@@ -13,6 +13,12 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import { userService } from "../../_services";
+import { connect } from "react-redux";
+import { userActions } from "../../_actions/user.actions";
+import { Redirect } from "react-router-dom";
+import Alert from "@material-ui/lab/Alert";
+import { CircularProgress } from "@material-ui/core";
+
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -84,11 +90,29 @@ class SignInSide extends React.Component {
   };
   handleSubmitChange = (e) => {
     e.preventDefault();
-    userService.login(this.state.username, this.state.password);
-    console.log(process.env.REACT_APP_SERVER_URL)
+    const username = this.state.username;
+    const password = this.state.password;
+    this.props.login(username, password);
+    // this.props.dispatch(userActions.login(username,password))
+    // userService.login(this.state.username, this.state.password);
+    console.log(process.env.REACT_APP_SERVER_URL);
   };
   render() {
-    const { classes } = this.props;
+    const { classes, location, alert, loggingIn } = this.props;
+    if (window.localStorage.getItem("user") !== null) {
+      // neu da login thi Redirect
+      return (
+        <Redirect
+          to={{
+            pathname: "/",
+            state: {
+              from: location,
+            },
+          }}
+        />
+      );
+    }
+
     return (
       <Grid container component="main" className={classes.root}>
         <CssBaseline />
@@ -138,9 +162,14 @@ class SignInSide extends React.Component {
                 color="primary"
                 className={classes.submit}
                 onClick={this.handleSubmitChange}
+                disable={loggingIn}
               >
-                Sign In
+                {loggingIn ? <CircularProgress color="secondary"/> : "Sign In"}
               </Button>
+              {alert.message && (
+                <Alert severity={`${alert.type}`}>{alert.message}</Alert>
+              )}
+
               <Box mt={5}>
                 <Copyright />
               </Box>
@@ -152,5 +181,21 @@ class SignInSide extends React.Component {
     );
   }
 }
+const mapStateToProps = (state) => {
+  const { loggingIn, loggedIn } = state.authentication;
+  const { alert } = state;
+  return {
+    loggingIn,
+    loggedIn,
+    alert,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    login: (username, password) =>
+      dispatch(userActions.login(username, password)),
+  };
+};
 const Login = withStyles(useStyles)(SignInSide);
-export { Login };
+const connectedLogin = connect(mapStateToProps, mapDispatchToProps)(Login);
+export { connectedLogin as Login };
