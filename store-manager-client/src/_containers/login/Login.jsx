@@ -162,8 +162,9 @@ class SignInSide extends React.Component {
                 color="primary"
                 className={classes.submit}
                 onClick={this.handleSubmitChange}
-                disable={loggingIn}
+                disable={`${loggingIn}`}
               >
+                
                 {loggingIn ? <CircularProgress color="secondary"/> : "Sign In"}
               </Button>
               {alert.message && (
