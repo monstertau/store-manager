@@ -7,7 +7,6 @@ import { LogOut } from "../logout";
 import { PrivateRoute } from "../../_components/PrivateRoute";
 import HomePage from "../../_containers/homepage/HomePage";
 import { PublicRoute } from "../../_components/PublicRoute";
-import { LogOut } from "../logout";
 import { userProfile } from "../user-profile";
 import Employee from "../employee/Employee";
 export function App(props) {
