@@ -19,8 +19,8 @@ const useStyles = (theme) => ({
 });
 const handleDashboard = () => {
   return <Redirect to={{ pathname: "/login" }} />;
-//   console.log(this.context.router.push("/path"));
-};
+    // console.log(this.context.router.push("/path"));
+}
 class HomePage extends React.Component {
   render() {
     const { classes } = this.props;

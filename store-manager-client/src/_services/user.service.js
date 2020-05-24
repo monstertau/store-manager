@@ -1,3 +1,9 @@
+import { authHeader } from "../_utils";
+export const userService = {
+  login,
+  logout,
+  getAll
+};
 function login(username, password) {
   const requestOption = {
     method: "POST",
@@ -29,7 +35,17 @@ function login(username, password) {
 function logout() {
   window.localStorage.removeItem("user");
 }
-export const userService = {
-  login,
-  logout,
-};
+function getAll() {
+  const requestOption = {
+    method: "GET",
+    headers: authHeader(),
+  };
+  return fetch(
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/users/1`,
+    requestOption
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+    });
+}

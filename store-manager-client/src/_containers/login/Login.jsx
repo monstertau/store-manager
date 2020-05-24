@@ -12,7 +12,6 @@ import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
-import { userService } from "../../_services";
 import { connect } from "react-redux";
 import { userActions } from "../../_actions/user.actions";
 import { Redirect } from "react-router-dom";

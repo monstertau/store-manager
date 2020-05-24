@@ -52,3 +52,7 @@ function logout() {
   userService.logout();
   return { type: userConstants.LOGOUT };
 }
+
+function getAll(){
+  
+}
