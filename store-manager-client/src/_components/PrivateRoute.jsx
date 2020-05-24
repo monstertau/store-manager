@@ -80,6 +80,9 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  mainContent: {
+    width: "100%",
+  },
 }));
 export const PrivateRoute = ({ component: Component, ...rest }) => {
   const classes = useStyles();
@@ -147,18 +150,20 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
         <Divider />
         <ThirdListItems />
       </Drawer>
-      <Route
-        {...rest}
-        render={(props) =>
-          localStorage.getItem("user") ? (
-            <Component {...props} />
-          ) : (
-            <Redirect
-              to={{ pathname: "/login", state: { from: props.location } }}
-            />
-          )
-        }
-      />
+      <div className={classes.mainContent}>
+        <Route
+          {...rest}
+          render={(props) =>
+            localStorage.getItem("user") ? (
+              <Component className={classes.mainContent} {...props} />
+            ) : (
+              <Redirect
+                to={{ pathname: "/login", state: { from: props.location } }}
+              />
+            )
+          }
+        />
+      </div>
       ;
     </div>
   );
