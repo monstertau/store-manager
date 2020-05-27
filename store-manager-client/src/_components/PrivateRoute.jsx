@@ -82,6 +82,7 @@ const useStyles = makeStyles((theme) => ({
   },
   mainContent: {
     width: "100%",
+    marginTop: "4rem",
   },
 }));
 export const PrivateRoute = ({ component: Component, ...rest }) => {

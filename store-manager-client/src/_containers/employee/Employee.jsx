@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { forwardRef } from "react";
+/* eslint-disable */
+import React, { useEffect, forwardRef } from "react";
 import MaterialTable from "material-table";
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
@@ -16,6 +16,16 @@ import Remove from "@material-ui/icons/Remove";
 import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
+import { employeeService } from "../../_services/employee.service";
+import Alert from "@material-ui/lab/Alert";
+import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import Dialog from "@material-ui/core/Dialog";
+import Button from "@material-ui/core/Button";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import CustomDialog from "./DialogChangePass";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -39,85 +49,126 @@ const tableIcons = {
   SortArrow: forwardRef((props, ref) => <ArrowDownward {...props} ref={ref} />),
   ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
+  VpnKeyIcon: forwardRef((props, ref) => <VpnKeyIcon {...props} ref={ref} />),
 };
 
-async function getUsers(page, size) {
-  const optionReq = {
-    method: "GET",
-  };
-  fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users?page=${page}&size=${size}`
-  );
-}
 export default function Employee() {
-  // useEffect(async () => {});
   const [state, setState] = React.useState({
     columns: [
       { title: "Name", field: "name" },
       { title: "Username", field: "username" },
-      { title: "Email", field: "Email" },
-      { title: "Salary", field: "salary", type: "numeric" },
-      { title: "mobileNo", field: "mobileNo" },
+      { title: "Email", field: "email" },
+      {
+        title: "Role",
+        field: "roles",
+        lookup: {
+          ROLE_ADMIN: "ROLE_ADMIN",
+          ROLE_CASHIER: "ROLE_CASHIER",
+          ROLE_MANAGER: "ROLE_MANAGER",
+        },
+      },
+      {
+        title: "Mobile Number",
+        field: "mobileNo",
+      },
       {
         title: "Address",
         field: "address",
-        lookup: { 34: "İstanbul", 63: "Şanlıurfa" },
+      },
+      {
+        title: "Salary",
+        field: "salary",
+        type: "numeric",
       },
     ],
-    // data: [
-    //   { name: "Mehmet", surname: "Baran", birthYear: 1987, birthCity: 63 },
-    //   {
-    //     name: "Zerya Betül",
-    //     surname: "Baran",
-    //     birthYear: 2017,
-    //     birthCity: 34,
-    //   },
-    // ],
+    alert: { type: "", message: "" },
+    data: [],
+    open: false,
   });
-
+  useEffect(() => {
+    new Promise(async (resolve, reject) => {
+      var result = await employeeService.getAll();
+      resolve();
+      setState({ ...state, page: 0, data: result.users });
+    });
+  }, []);
   return (
-    <MaterialTable
-      title="Editable Example"
-      columns={state.columns}
-      data={state.data}
-      editable={{
-        onRowAdd: (newData) =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve();
-              setState((prevState) => {
-                const data = [...prevState.data];
-                data.push(newData);
-                return { ...prevState, data };
-              });
-            }, 600);
-          }),
-        onRowUpdate: (newData, oldData) =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve();
-              if (oldData) {
-                setState((prevState) => {
-                  const data = [...prevState.data];
-                  data[data.indexOf(oldData)] = newData;
-                  return { ...prevState, data };
-                });
-              }
-            }, 600);
-          }),
-        onRowDelete: (oldData) =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve();
-              setState((prevState) => {
-                const data = [...prevState.data];
-                data.splice(data.indexOf(oldData), 1);
-                return { ...prevState, data };
-              });
-            }, 600);
-          }),
-      }}
-      icons={tableIcons}
-    />
+    <div>
+      {state.alert.message !== "" ? (
+        <Alert severity={`${state.alert.type}`}>
+          {state.alert.message.toUpperCase()}
+        </Alert>
+      ) : (
+        <></>
+      )}
+      <div style={{ padding: "10px 15px" }}>
+        <MaterialTable
+          title="Employee Managemnent"
+          columns={state.columns}
+          data={state.data}
+          editable={{
+            onRowAdd: (newData) =>
+              new Promise((resolve) => {
+                setTimeout(async () => {
+                  var newUser = await employeeService.addUser(newData);
+                  setState((prevState) => {
+                    const data = [...prevState.data];
+                    data.push(newData);
+                    return { ...prevState, data };
+                  });
+                  resolve();
+                }, 600);
+              }),
+            onRowUpdate: (newData, oldData) =>
+              new Promise((resolve) => {
+                setTimeout(async () => {
+                  var updateMsg = await employeeService.updateUser(newData);
+                  // setState({ ...state, data: dataUpdate });
+                  setState((prevState) => {
+                    let dataUpdate = [...prevState.data];
+                    let index = oldData.tableData.id;
+                    dataUpdate[index] = newData;
+                    return { ...prevState, data: dataUpdate };
+                  });
+                  resolve();
+                }, 600);
+              }),
+            onRowDelete: (oldData) =>
+              new Promise((resolve) => {
+                setTimeout(async () => {
+                  var msgRemove = await employeeService.deleteUser(oldData.id);
+                  setState((prevState) => {
+                    let dataDelete = [...prevState.data];
+                    let index = oldData.tableData.id;
+                    dataDelete.splice(index, 1);
+                    return { ...prevState, data: dataDelete };
+                  });
+                  resolve();
+                }, 600);
+              }),
+          }}
+          actions={[
+            {
+              icon: VpnKeyIcon,
+              tooltip: "Reset default password",
+              onClick: async (event, rowData) => {
+                var defaultPass = "a";
+                rowData.password = defaultPass;
+                let updatePassMsg = await employeeService.updateUser(rowData);
+              },
+            },
+          ]}
+          options={{
+            search: true,
+            actionsColumnIndex: -1,
+            headerStyle: {
+              backgroundColor: "#EEE",
+              fontSize: "16px",
+            },
+          }}
+          icons={tableIcons}
+        />
+      </div>
+    </div>
   );
 }

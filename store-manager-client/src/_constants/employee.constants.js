@@ -1,0 +1,4 @@
+export const employeeConstants = {
+  GET_EMPLOYEE_SUCESS: "EMPLOYEE_GET_SUCCESS",
+  GET_EMPLOYEE_FAIL: "EMEMPLOYEE_GET_FAIL",
+};
