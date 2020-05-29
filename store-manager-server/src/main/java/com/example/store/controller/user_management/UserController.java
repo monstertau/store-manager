@@ -144,7 +144,6 @@ public class UserController {
         if(updateUserRequest.getEmail() != null) user.setEmail(updateUserRequest.getEmail());
         if(updateUserRequest.getAddress() != null) user.setAddress(updateUserRequest.getAddress());
         if(updateUserRequest.getMobileNo() != null) user.setMobileNo(updateUserRequest.getMobileNo());
-
         userRepository.save(user);
         return new ResponseEntity<>(new ApiResponse(true, "update_user_information_successful", "update your information successful"),
                                 HttpStatus.OK);

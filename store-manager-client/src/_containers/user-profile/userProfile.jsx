@@ -11,6 +11,11 @@ import { Typography, Button } from "@material-ui/core";
 import Skeleton from "@material-ui/lab/Skeleton";
 import { connect } from "react-redux";
 import { userActions } from "../../_actions/user.actions";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
+import Slide from "@material-ui/core/Slide";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 const useStyles = (theme) => ({
   layout: {
     width: "auto",
@@ -32,27 +37,68 @@ const useStyles = (theme) => ({
       padding: theme.spacing(3),
     },
   },
+
   buttonStyle: {
+    marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
   },
   control: {
     padding: theme.spacing(2),
   },
+  close: {
+    padding: theme.spacing(0.5),
+  },
 });
+function TransitionDown(props) {
+  return <Slide {...props} direction="down" />;
+}
 class userProfile extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: true,
+    };
+  }
   componentDidMount() {
     setTimeout(() => {
       this.props.getUserInfo();
     }, 1000);
   }
+  handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    this.setState({
+      open: false,
+    });
+  };
   render() {
-    const { classes, loadedProfile, userProfile,alert } = this.props;
+    const { classes, loadedProfile, userProfile, alert } = this.props;
     return (
       <main className={classes.layout}>
+        {alert.message && (
+          <Snackbar
+            open={this.state.open}
+            autoHideDuration={2000}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            TransitionComponent={TransitionDown}
+            onClose={this.handleClose}
+            message="hehe"
+          >
+            <MuiAlert
+              severity={`${alert.type}`}
+              elevation={6}
+              variant="filled"
+              onClose={this.handleClose}
+            >
+              {alert.message}
+            </MuiAlert>
+          </Snackbar>
+        )}
         <Paper className={classes.paper}>
-          {alert.message && (
-            <Alert severity={`${alert.type}`}>{alert.message}</Alert>
-          )}
           <Typography component="h1" variant="h4" align="center">
             User Profile
           </Typography>

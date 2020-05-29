@@ -25,16 +25,16 @@ export const authentication = (state = initialState, action) => {
 
 export const userInfomation = (state = {}, action) => {
   switch (action.type) {
-    case userConstants.GETALL_REQUEST:
+    case userConstants.GET_INFO_REQUEST:
       return {
         loadingProfile: true,
       };
-    case userConstants.GETALL_SUCCESS:
+    case userConstants.GET_INFO_SUCCESS:
       return {
         loadedProfile: true,
         userProfile: action.user,
       };
-    case userConstants.GETALL_FAILURE:
+    case userConstants.GET_INFO_FAILURE:
       return {
         loadedProfile: false,
       };

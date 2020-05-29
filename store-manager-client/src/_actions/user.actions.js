@@ -57,23 +57,42 @@ function getUserInfo() {
   return (dispatch) => {
     const localUser = localStorage.getItem("user");
     dispatch(request());
-    userService.getUserInfo().then((user) => {
-      if (user.success === true) {
-        dispatch(success(user));
+    userService.getUserInfo().then((data) => {
+      if (data.success === true) {
+        dispatch(success(data));
         dispatch(alertActions.success("Get User Profile Success. "));
       } else {
-        dispatch(failure(user.code));
-        dispatch(alertActions.error("Get User Profile failed: " + user.code));
+        dispatch(failure(data.code));
+        dispatch(alertActions.error("Get User Profile failed: " + data.code));
       }
     });
   };
   function request() {
-    return { type: userConstants.GETALL_REQUEST };
+    return { type: userConstants.GET_INFO_REQUEST };
   }
   function success(user) {
-    return { type: userConstants.GETALL_SUCCESS, user };
+    return { type: userConstants.GET_INFO_SUCCESS, user };
   }
   function failure(error) {
-    return { type: userConstants.GETALL_FAILURE, error };
+    return { type: userConstants.GET_INFO_FAILURE, error };
+  }
+}
+function updateUserInfo(userInfo) {
+  return (dispatch) => {
+    dispatch(request());
+    userService.updateUserInfo(userInfo).then((data) => {
+      if(data.success === true){
+        dispatch(success(data))
+      }
+    });
+  };
+  function request() {
+    return { type: userConstants.UPDATE_INFO_REQUEST };
+  }
+  function success(user) {
+    return { type: userConstants.UPDATE_INFO_SUCCESS, user };
+  }
+  function failure(error) {
+    return { type: userConstants.UPDATE_INFO_FAILURE, error };
   }
 }

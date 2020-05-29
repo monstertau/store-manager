@@ -1,8 +1,9 @@
-import { authHeader } from "../_utils";
+import { authHeader,authHeaderWithCT } from "../_utils";
 export const userService = {
   login,
   logout,
   getUserInfo,
+  updateUserInfo,
 };
 function login(username, password) {
   const requestOption = {
@@ -39,6 +40,19 @@ function getUserInfo() {
   const requestOption = {
     method: "GET",
     headers: authHeader(),
+  };
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/me`, requestOption)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+      return data;
+    });
+}
+function updateUserInfo(UserInfo) {
+  const requestOption = {
+    method: "PUT",
+    headers: authHeaderWithCT(),
+    body: JSON.stringify(UserInfo),
   };
   return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/me`, requestOption)
     .then((res) => res.json())
