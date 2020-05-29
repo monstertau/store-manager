@@ -8,6 +8,7 @@ import { PrivateRoute } from "../../_components/PrivateRoute";
 import HomePage from "../../_containers/homepage/HomePage";
 import { PublicRoute } from "../../_components/PublicRoute";
 import { userProfile } from "../user-profile";
+import Customer from "../cashier/Customer";
 import Employee from "../employee/Employee";
 export function App(props) {
   // const [setAnchorEl] = React.useState(null);
@@ -18,10 +19,11 @@ export function App(props) {
         <PrivateRoute component={HomePage} path="/" exact />
         <PrivateRoute component={LogOut} path="/logout" exact />
         <PrivateRoute component={Employee} path="/employee" exact />
-      {/* <Route component={Employee} path="/employee" exact />/> */}
-        <PublicRoute component={Login} path="/login" exact />
+        <PrivateRoute component={Customer} path="/customers" exact />
         <PrivateRoute component={LogOut} path="/logout" exact />
         <PrivateRoute component={userProfile} path="/profile" />
+
+        <PublicRoute component={Login} path="/login" exact />
       </Switch>
     </BrowserRouter>
   );

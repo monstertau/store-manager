@@ -64,9 +64,10 @@ export default function Customer() {
       {
         title: "Name",
         field: "name",
+        required: true,
       },
-      { title: "Username", field: "username" },
-      { title: "Email", field: "email" },
+      { title: "Username", field: "username", required: true },
+      { title: "Email", field: "email", required: true },
       {
         title: "Role",
         field: "roles",
@@ -77,7 +78,7 @@ export default function Customer() {
         },
       },
       {
-        title: "Mobile Number",
+        title: "MobileNo",
         field: "mobileNo",
       },
       {
@@ -88,8 +89,18 @@ export default function Customer() {
         title: "Salary",
         field: "salary",
         type: "numeric",
-        width: "1%",
-        cellStyle: { whiteSpace: "nowrap", paddingLeft: "0" },
+        a: "1%",
+        cellStyle: {
+          // whiteSpace: "nowrap",
+          paddingLeft: 0,
+          paddingRight: "3rem",
+          // textAlign: "center",
+        },
+        headerStyle: {
+          // textAlign: "left",
+          paddingLeft: 0,
+          paddingRight: "3rem",
+        },
       },
     ],
     alert: { type: "", message: "" },
@@ -108,8 +119,12 @@ export default function Customer() {
   const ResetPassHandler = async (rowData) => {
     // rowData.password = "1";
     rowData.password = "1";
-    let resetPass = await employeeService.updateUser(rowData);
-    console.log(resetPass);
+    let resetPassMsg = await employeeService.updateUser(rowData);
+    if (resetPassMsg.success === true) {
+      console.log(resetPassMsg.message);
+    } else {
+      console.log(resetPassMsg.message);
+    }
   };
   useEffect(() => {
     new Promise(async (resolve, reject) => {
@@ -136,26 +151,37 @@ export default function Customer() {
             onRowAdd: (newData) =>
               new Promise((resolve) => {
                 setTimeout(async () => {
-                  var newUser = await employeeService.addUser(newData);
-                  setState((prevState) => {
-                    const data = [...prevState.data];
-                    data.push(newData);
-                    return { ...prevState, data };
-                  });
+                  let newUserMsg = await employeeService.addUser(newData);
+                  if (newUserMsg.success === true) {
+                    setState((prevState) => {
+                      const data = [...prevState.data];
+                      data.push({ ...newData, id: newUserMsg.id });
+                      return { ...prevState, data };
+                    });
+                  } else {
+                    console.log(newUserMsg.message);
+                  }
                   resolve();
                 }, 600);
               }),
             onRowUpdate: (newData, oldData) =>
               new Promise((resolve) => {
                 setTimeout(async () => {
-                  var updateMsg = await employeeService.updateUser(newData);
-                  // setState({ ...state, data: dataUpdate });
-                  setState((prevState) => {
-                    let dataUpdate = [...prevState.data];
-                    let index = oldData.tableData.id;
-                    dataUpdate[index] = newData;
-                    return { ...prevState, data: dataUpdate };
-                  });
+                  if (employeeService.compareUser(newData, oldData)) {
+                    console.log("New Data == Old Data!");
+                  } else {
+                    var updateMsg = await employeeService.updateUser(newData);
+                    if (updateMsg.success === true) {
+                      setState((prevState) => {
+                        let dataUpdate = [...prevState.data];
+                        let index = oldData.tableData.id;
+                        dataUpdate[index] = newData;
+                        return { ...prevState, data: dataUpdate };
+                      });
+                    } else {
+                      console.log(updateMsg.message);
+                    }
+                  }
                   resolve();
                 }, 600);
               }),
@@ -163,12 +189,16 @@ export default function Customer() {
               new Promise((resolve) => {
                 setTimeout(async () => {
                   var msgRemove = await employeeService.deleteUser(oldData.id);
-                  setState((prevState) => {
-                    let dataDelete = [...prevState.data];
-                    let index = oldData.tableData.id;
-                    dataDelete.splice(index, 1);
-                    return { ...prevState, data: dataDelete };
-                  });
+                  if (msgRemove.success === true) {
+                    setState((prevState) => {
+                      let dataDelete = [...prevState.data];
+                      let index = oldData.tableData.id;
+                      dataDelete.splice(index, 1);
+                      return { ...prevState, data: dataDelete };
+                    });
+                  } else {
+                    console.log(msgRemove.message);
+                  }
                   resolve();
                 }, 600);
               }),
@@ -195,6 +225,12 @@ export default function Customer() {
             headerStyle: {
               backgroundColor: "#EEE",
               fontSize: "16px",
+            },
+            actionsCellStyle: {
+              // display: "flex",
+              // justifyContent: "center",
+              paddingLeft: 16,
+              // width: "100%",
             },
           }}
           icons={tableIcons}
