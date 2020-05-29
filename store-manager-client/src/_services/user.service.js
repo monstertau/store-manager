@@ -2,7 +2,7 @@ import { authHeader } from "../_utils";
 export const userService = {
   login,
   logout,
-  getAll
+  getUserInfo,
 };
 function login(username, password) {
   const requestOption = {
@@ -35,17 +35,15 @@ function login(username, password) {
 function logout() {
   window.localStorage.removeItem("user");
 }
-function getAll() {
+function getUserInfo() {
   const requestOption = {
     method: "GET",
     headers: authHeader(),
   };
-  return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users/1`,
-    requestOption
-  )
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/me`, requestOption)
     .then((res) => res.json())
     .then((data) => {
       console.log(data);
+      return data;
     });
 }

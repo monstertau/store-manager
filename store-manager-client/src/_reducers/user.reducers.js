@@ -22,3 +22,23 @@ export const authentication = (state = initialState, action) => {
       return state;
   }
 };
+
+export const userInfomation = (state = {}, action) => {
+  switch (action.type) {
+    case userConstants.GETALL_REQUEST:
+      return {
+        loadingProfile: true,
+      };
+    case userConstants.GETALL_SUCCESS:
+      return {
+        loadedProfile: true,
+        userProfile: action.user,
+      };
+    case userConstants.GETALL_FAILURE:
+      return {
+        loadedProfile: false,
+      };
+    default:
+      return state;
+  }
+};

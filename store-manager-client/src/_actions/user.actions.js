@@ -5,6 +5,7 @@ import { history } from "../_utils";
 export const userActions = {
   login,
   logout,
+  getUserInfo,
 };
 
 function login(username, password) {
@@ -34,7 +35,6 @@ function login(username, password) {
           );
         }
       }
-      
     });
   };
 
@@ -53,6 +53,27 @@ function logout() {
   return { type: userConstants.LOGOUT };
 }
 
-function getAll(){
-  
+function getUserInfo() {
+  return (dispatch) => {
+    const localUser = localStorage.getItem("user");
+    dispatch(request());
+    userService.getUserInfo().then((user) => {
+      if (user.success === true) {
+        dispatch(success(user));
+        dispatch(alertActions.success("Get User Profile Success. "));
+      } else {
+        dispatch(failure(user.code));
+        dispatch(alertActions.error("Get User Profile failed: " + user.code));
+      }
+    });
+  };
+  function request() {
+    return { type: userConstants.GETALL_REQUEST };
+  }
+  function success(user) {
+    return { type: userConstants.GETALL_SUCCESS, user };
+  }
+  function failure(error) {
+    return { type: userConstants.GETALL_FAILURE, error };
+  }
 }
