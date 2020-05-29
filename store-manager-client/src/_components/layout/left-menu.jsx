@@ -14,7 +14,8 @@ import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
 import FaceIcon from "@material-ui/icons/Face";
 import ReceiptIcon from "@material-ui/icons/Receipt";
 import { makeStyles } from "@material-ui/core/styles";
-
+import { MenuItem } from "@material-ui/core";
+import { Link } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   sidebar: {
     paddingLeft: "1.5rem",
@@ -22,43 +23,86 @@ const useStyles = makeStyles((theme) => ({
       paddingLeft: "16px",
     },
   },
+  inheritLink: {
+    textDecoration: "inherit",
+    color: "inherit",
+  },
 }));
 
+const MainItems = [
+  {
+    primary: "Dashboard",
+    path: "/dashboard",
+    icon: DashboardIcon,
+  },
+  {
+    primary: "Cashier UI",
+    path: "/cashierui",
+    icon: MonetizationOnIcon,
+  },
+  {
+    primary: "Orders",
+    path: "/orders",
+    icon: ShoppingCartIcon,
+  },
+  {
+    primary: "Customers",
+    path: "/customers",
+    icon: FaceIcon,
+  },
+  {
+    primary: "Bill",
+    path: "/bill",
+    icon: ReceiptIcon,
+  },
+];
+const SecondaryItems = [
+  {
+    primary: "Report",
+    path: "/report",
+    icon: BarChartIcon,
+  },
+  {
+    primary: "Employee",
+    path: "/employee",
+    icon: PeopleIcon,
+  },
+  {
+    primary: "Inventory",
+    path: "/inventory",
+    icon: StoreIcon,
+  },
+];
+const ThirdItems = [
+  {
+    primary: "Settings",
+    path: "/settings",
+    icon: SettingsIcon,
+  },
+  {
+    primary: "Contact Support",
+    path: "/contact",
+    icon: ContactSupportIcon,
+  },
+];
 export const MainListItems = () => {
   const classes = useStyles();
   return (
     <div>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <DashboardIcon />
-        </ListItemIcon>
-        <ListItemText primary="Dashboard" />
-      </ListItem>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <MonetizationOnIcon />
-        </ListItemIcon>
-        <ListItemText primary="Cashier UI" />
-      </ListItem>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <ShoppingCartIcon />
-        </ListItemIcon>
-        <ListItemText primary="Orders" />
-      </ListItem>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <FaceIcon />
-        </ListItemIcon>
-        <ListItemText primary="Customers" />
-      </ListItem>
-
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <ReceiptIcon />
-        </ListItemIcon>
-        <ListItemText primary="Bill" />
-      </ListItem>
+      {MainItems.map((item, index) => (
+        <ListItem
+          button
+          className={classes.sidebar}
+          component={Link}
+          to={item.path}
+          key={index}
+        >
+          <ListItemIcon>
+            <item.icon />
+          </ListItemIcon>
+          <ListItemText primary={item.primary} />
+        </ListItem>
+      ))}
     </div>
   );
 };
@@ -66,19 +110,20 @@ export const ThirdListItems = () => {
   const classes = useStyles();
   return (
     <div>
-      {/* <ListSubheader inset>Manage Store</ListSubheader> */}
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <SettingsIcon />
-        </ListItemIcon>
-        <ListItemText primary="Settings" />
-      </ListItem>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <ContactSupportIcon />
-        </ListItemIcon>
-        <ListItemText primary="Contact Support" />
-      </ListItem>
+      {ThirdItems.map((item, index) => (
+        <ListItem
+          button
+          className={classes.sidebar}
+          component={Link}
+          to={item.path}
+          key={index}
+        >
+          <ListItemIcon>
+            <item.icon />
+          </ListItemIcon>
+          <ListItemText primary={item.primary} />
+        </ListItem>
+      ))}
     </div>
   );
 };
@@ -86,25 +131,20 @@ export const SecondaryListItems = () => {
   const classes = useStyles();
   return (
     <div>
-      {/* <ListSubheader inset>Manage Store</ListSubheader> */}
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <BarChartIcon />
-        </ListItemIcon>
-        <ListItemText primary="Reports" />
-      </ListItem>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <PeopleIcon />
-        </ListItemIcon>
-        <ListItemText primary="Employees" />
-      </ListItem>
-      <ListItem button className={classes.sidebar}>
-        <ListItemIcon>
-          <StoreIcon />
-        </ListItemIcon>
-        <ListItemText primary="Inventory" />
-      </ListItem>
+      {SecondaryItems.map((item, index) => (
+        <ListItem
+          button
+          className={classes.sidebar}
+          component={Link}
+          to={item.path}
+          key={index}
+        >
+          <ListItemIcon>
+            <item.icon />
+          </ListItemIcon>
+          <ListItemText primary={item.primary} />
+        </ListItem>
+      ))}
     </div>
   );
 };

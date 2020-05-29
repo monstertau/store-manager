@@ -1,18 +1,18 @@
 import { authHeader, authHeaderWithCT } from "../_utils";
-export const employeeService = {
+export const customerService = {
   getAll,
-  addUser,
-  updateUser,
-  deleteUser,
-  compareUser,
+  addCustomer,
+  updateCustomer,
+  deleteCustomer,
 };
+
 async function getAll() {
   const requestOption = {
     method: "GET",
     headers: authHeader(),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/customers`,
     requestOption
   )
     .then((res) => res.json())
@@ -21,13 +21,9 @@ async function getAll() {
       return data;
     });
 }
-async function addUser(newData) {
-  let roles = [];
-  if (newData.roles) {
-    roles.push(newData.roles);
-    // console.log(roles);
-  }
-  newData = await { ...newData, roles: roles, password: "1" };
+
+async function addCustomer(newData) {
+  // newData = { ...newData };
   console.log(newData);
   const requestOption = {
     method: "POST",
@@ -36,7 +32,7 @@ async function addUser(newData) {
   };
   // console.log(requestOption);
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/customers`,
     requestOption
   )
     .then((res) => res.json())
@@ -45,20 +41,15 @@ async function addUser(newData) {
       return data;
     });
 }
-async function updateUser(newData) {
-  if (!Array.isArray(newData.roles)) {
-    let roles = [];
-    roles.push(newData.roles);
-    // console.log(roles);
-    newData.roles = await roles;
-  }
+
+async function updateCustomer(newData) {
   const requestOption = {
     method: "PUT",
     headers: authHeaderWithCT(),
     body: JSON.stringify(newData),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users/${newData.id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/customers/${newData.id}`,
     requestOption
   )
     .then((res) => res.json())
@@ -66,13 +57,13 @@ async function updateUser(newData) {
       return data;
     });
 }
-async function deleteUser(id) {
+async function deleteCustomer(id) {
   const requestOption = {
     method: "DELETE",
     headers: authHeader(),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users/${id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/customers/${id}`,
     requestOption
   )
     .then((res) => res.json())
@@ -80,10 +71,4 @@ async function deleteUser(id) {
       // console.log(data);
       return data;
     });
-}
-async function compareUser(user1, user2) {
-  return (
-    JSON.stringify(Object.assign({}, { ...user1, tableData: "" })) ===
-    JSON.stringify(Object.assign({}, { ...user2, tableData: "" }))
-  );
 }
