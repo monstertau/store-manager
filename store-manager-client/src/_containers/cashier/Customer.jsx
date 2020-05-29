@@ -222,7 +222,6 @@ export default function Customer() {
           <Button
             onClick={(e) => {
               ResetPassHandler(state.userResetPass);
-              handleClose();
             }}
             color="primary"
           >
