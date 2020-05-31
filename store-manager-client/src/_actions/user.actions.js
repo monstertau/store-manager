@@ -6,6 +6,7 @@ export const userActions = {
   login,
   logout,
   getUserInfo,
+  updateUserInfo,
 };
 
 function login(username, password) {
@@ -52,7 +53,6 @@ function logout() {
   userService.logout();
   return { type: userConstants.LOGOUT };
 }
-
 function getUserInfo() {
   return (dispatch) => {
     const localUser = localStorage.getItem("user");
@@ -79,20 +79,29 @@ function getUserInfo() {
 }
 function updateUserInfo(userInfo) {
   return (dispatch) => {
-    dispatch(request());
+    dispatch(request(userInfo));
     userService.updateUserInfo(userInfo).then((data) => {
-      if(data.success === true){
-        dispatch(success(data))
+      if (data.success === true) {
+        dispatch(success(data));
+        dispatch(alertActions.success("Update User Profile Success"));
+      } else {
+        dispatch(failure(data.code));
+        dispatch(
+          alertActions.error("Update User Profile failed: " + data.code)
+        );
       }
     });
   };
-  function request() {
-    return { type: userConstants.UPDATE_INFO_REQUEST };
+  function request(userInfo) {
+    return { type: userConstants.UPDATE_INFO_REQUEST, userInfo };
   }
-  function success(user) {
-    return { type: userConstants.UPDATE_INFO_SUCCESS, user };
+  function success(response) {
+    return { type: userConstants.UPDATE_INFO_SUCCESS, response };
   }
   function failure(error) {
     return { type: userConstants.UPDATE_INFO_FAILURE, error };
   }
+}
+function changePassword(){
+  
 }

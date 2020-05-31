@@ -28,6 +28,7 @@ export const userInfomation = (state = {}, action) => {
     case userConstants.GET_INFO_REQUEST:
       return {
         loadingProfile: true,
+        
       };
     case userConstants.GET_INFO_SUCCESS:
       return {
@@ -36,7 +37,22 @@ export const userInfomation = (state = {}, action) => {
       };
     case userConstants.GET_INFO_FAILURE:
       return {
-        loadedProfile: false,
+        error: action.error,
+      };
+    case userConstants.UPDATE_INFO_REQUEST:
+      return {
+        loadingButton: true,
+        updateProfile: action.userInfo,
+      };
+    case userConstants.UPDATE_INFO_SUCCESS:
+      return {
+        loadingButton: true,
+        updated: true,
+        updateResponse: action.response,
+      };
+    case userConstants.UPDATE_INFO_FAILURE:
+      return {
+        error: action.error,
       };
     default:
       return state;
