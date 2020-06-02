@@ -21,6 +21,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import PasswordField from "../../_components/common/PasswordField";
 import { userService } from "../../_services";
+import CustomAlert from "../../_components/common/CustomAlert";
 const useStyles = (theme) => ({
   layout: {
     width: "auto",
@@ -74,7 +75,7 @@ class userProfile extends React.Component {
         mobileNo: "",
         salary: 0,
         oldPassword: "",
-        newPassword: ""
+        newPassword: "",
       },
     };
   }
@@ -139,8 +140,8 @@ class userProfile extends React.Component {
   handleChangePassword = () => {
     let oldPassword = this.state.userInfo.oldPassword;
     let newPassword = this.state.userInfo.newPassword;
-    console.log(oldPassword)
-    console.log(newPassword)
+    console.log(oldPassword);
+    console.log(newPassword);
     userService.changePassword(oldPassword, newPassword);
   };
   render() {
@@ -150,32 +151,19 @@ class userProfile extends React.Component {
       userProfile,
       alert,
       loadingButton,
-      loadingProfile
+      loadingProfile,
     } = this.props;
     // console.log(this.state);
     return (
       <main className={classes.layout}>
         {alert.message && (
-          <Snackbar
+          <CustomAlert
             open={alert.alertPopUp}
             autoHideDuration={2000}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-            TransitionComponent={TransitionDown}
+            type={`${alert.type}`}
             onClose={this.handleClose}
-            message="hehe"
-          >
-            <MuiAlert
-              severity={`${alert.type}`}
-              elevation={6}
-              variant="filled"
-              onClose={this.handleClose}
-            >
-              {alert.message}
-            </MuiAlert>
-          </Snackbar>
+            message={`${alert.message}`}
+          />
         )}
         <Paper className={classes.paper}>
           <Typography component="h1" variant="h4" align="center">
@@ -191,7 +179,9 @@ class userProfile extends React.Component {
                   label="Full Name"
                   fullWidth
                   variant="outlined"
-                  defaultValue={userProfile && userProfile.name && `${userProfile.name}`}
+                  defaultValue={
+                    userProfile && userProfile.name && `${userProfile.name}`
+                  }
                   onChange={this.handleChange("name")}
                 />
               ) : (
