@@ -1,8 +1,10 @@
-import { authHeader } from "../_utils";
+import { authHeader, authHeaderWithCT } from "../_utils";
 export const userService = {
   login,
   logout,
-  getAll
+  getUserInfo,
+  updateUserInfo,
+  changePassword,
 };
 function login(username, password) {
   const requestOption = {
@@ -18,12 +20,9 @@ function login(username, password) {
     .then((data) => {
       console.log(data);
       if (data.success === true) {
-        window.localStorage.setItem(
+        localStorage.setItem(
           "user",
           JSON.stringify({
-            fullname: data.name,
-            email: data.email,
-            username: data.username,
             tokenType: data.tokenType,
             token: data.accessToken,
           })
@@ -33,19 +32,56 @@ function login(username, password) {
     });
 }
 function logout() {
-  window.localStorage.removeItem("user");
+  localStorage.removeItem("user");
 }
-function getAll() {
+function getUserInfo() {
   const requestOption = {
     method: "GET",
     headers: authHeader(),
   };
+  console.log(authHeader());
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/me`, requestOption)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+      return data;
+    });
+}
+function updateUserInfo(UserInfo) {
+  const requestOption = {
+    method: "PUT",
+    headers: authHeaderWithCT(),
+    body: JSON.stringify(UserInfo),
+  };
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/me`, requestOption)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+      return data;
+    });
+}
+function changePassword(oldPassword, newPassword) {
+  const requestOption = {
+    method: "PUT",
+    headers: authHeaderWithCT(),
+    body: JSON.stringify({ oldPassword, newPassword }),
+  };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/users/1`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/me/change_password`,
     requestOption
   )
     .then((res) => res.json())
     .then((data) => {
+      if (data.accessToken) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            tokenType: data.tokenType,
+            token: data.accessToken,
+          })
+        );
+      }
       console.log(data);
+      return data;
     });
 }

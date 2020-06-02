@@ -5,6 +5,8 @@ import { history } from "../_utils";
 export const userActions = {
   login,
   logout,
+  getUserInfo,
+  updateUserInfo,
 };
 
 function login(username, password) {
@@ -34,7 +36,6 @@ function login(username, password) {
           );
         }
       }
-      
     });
   };
 
@@ -52,7 +53,55 @@ function logout() {
   userService.logout();
   return { type: userConstants.LOGOUT };
 }
-
-function getAll(){
+function getUserInfo() {
+  return (dispatch) => {
+    const localUser = localStorage.getItem("user");
+    dispatch(request());
+    userService.getUserInfo().then((data) => {
+      if (data.success === true) {
+        dispatch(success(data));
+        dispatch(alertActions.success("Get User Profile Success. "));
+      } else {
+        dispatch(failure(data.code));
+        dispatch(alertActions.error("Get User Profile failed: " + data.code));
+      }
+    });
+  };
+  function request() {
+    return { type: userConstants.GET_INFO_REQUEST };
+  }
+  function success(user) {
+    return { type: userConstants.GET_INFO_SUCCESS, user };
+  }
+  function failure(error) {
+    return { type: userConstants.GET_INFO_FAILURE, error };
+  }
+}
+function updateUserInfo(userInfo) {
+  return (dispatch) => {
+    dispatch(request(userInfo));
+    userService.updateUserInfo(userInfo).then((data) => {
+      if (data.success === true) {
+        dispatch(success(data));
+        dispatch(alertActions.success("Update User Profile Success"));
+      } else {
+        dispatch(failure(data.code));
+        dispatch(
+          alertActions.error("Update User Profile failed: " + data.code)
+        );
+      }
+    });
+  };
+  function request(userInfo) {
+    return { type: userConstants.UPDATE_INFO_REQUEST, userInfo };
+  }
+  function success(response) {
+    return { type: userConstants.UPDATE_INFO_SUCCESS, response };
+  }
+  function failure(error) {
+    return { type: userConstants.UPDATE_INFO_FAILURE, error };
+  }
+}
+function changePassword(){
   
 }
