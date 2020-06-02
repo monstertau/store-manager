@@ -14,7 +14,6 @@ import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
 import FaceIcon from "@material-ui/icons/Face";
 import ReceiptIcon from "@material-ui/icons/Receipt";
 import { makeStyles } from "@material-ui/core/styles";
-import { MenuItem } from "@material-ui/core";
 import { Link } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   sidebar: {

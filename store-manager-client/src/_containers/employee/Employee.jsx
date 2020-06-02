@@ -25,6 +25,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { validateService } from "../../_services/validate.service";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -134,15 +135,18 @@ export default function Customer() {
     });
   }, []);
   return (
-    <div>
+    <div style={{ padding: "10px 15px" }}>
       {state.alert.message !== "" ? (
-        <Alert severity={`${state.alert.type}`}>
+        <Alert
+          severity={`${state.alert.type}`}
+          style={{ marginBottom: "10px" }}
+        >
           {state.alert.message.toUpperCase()}
         </Alert>
       ) : (
         <></>
       )}
-      <div style={{ padding: "10px 15px" }}>
+      <div>
         <MaterialTable
           title="Employee Managemnent"
           columns={state.columns}
@@ -165,11 +169,54 @@ export default function Customer() {
                 }, 600);
               }),
             onRowUpdate: (newData, oldData) =>
-              new Promise((resolve) => {
-                setTimeout(async () => {
-                  if (employeeService.compareUser(newData, oldData)) {
-                    console.log("New Data == Old Data!");
-                  } else {
+              new Promise(async (resolve, reject) => {
+                // let check1 = await JSON.stringify(
+                //   Object.assign({}, { ...newData, tableData: "" })
+                // );
+                // let check2 = await JSON.stringify(
+                //   Object.assign({}, { ...oldData, tableData: "" })
+                // );
+                console.log(await validateService.validateEmail(newData.email));
+                console.log(
+                  await validateService.validateMobileNumber(newData.mobileNo)
+                );
+                if (await employeeService.compareUser(newData, oldData)) {
+                  setState((prevState) => {
+                    return {
+                      ...prevState,
+                      alert: {
+                        type: "error",
+                        message: "Your data is the same as before!",
+                      },
+                    };
+                  });
+                  return reject();
+                } else if (await validateService.validateEmail(newData.email)) {
+                  setState((prevState) => {
+                    return {
+                      ...prevState,
+                      alert: {
+                        type: "error",
+                        message: "Please enter valid email!",
+                      },
+                    };
+                  });
+                  return reject();
+                } else if (
+                  await validateService.validateMobileNumber(newData.mobileNo)
+                ) {
+                  setState((prevState) => {
+                    return {
+                      ...prevState,
+                      alert: {
+                        type: "error",
+                        message: "Please enter valid phone number!",
+                      },
+                    };
+                  });
+                  return reject();
+                } else {
+                  setTimeout(async () => {
                     var updateMsg = await employeeService.updateUser(newData);
                     if (updateMsg.success === true) {
                       setState((prevState) => {
@@ -181,9 +228,9 @@ export default function Customer() {
                     } else {
                       console.log(updateMsg.message);
                     }
-                  }
-                  resolve();
-                }, 600);
+                  }, 600);
+                }
+                resolve();
               }),
             onRowDelete: (oldData) =>
               new Promise((resolve) => {

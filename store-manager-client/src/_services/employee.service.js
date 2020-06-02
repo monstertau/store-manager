@@ -1,4 +1,5 @@
 import { authHeader, authHeaderWithCT } from "../_utils";
+import { validateService } from "./validate.service";
 export const employeeService = {
   getAll,
   addUser,
