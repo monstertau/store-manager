@@ -26,7 +26,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { validateService } from "../../_services/validate.service";
-import CustomAlert from "../../_components/common/CustomAlert";
+import { connect } from "react-redux";
+import { alertActions } from "../../_actions/alert.actions";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -53,7 +54,7 @@ const tableIcons = {
   VpnKeyIcon: forwardRef((props, ref) => <VpnKeyIcon {...props} ref={ref} />),
 };
 
-export default function Customer() {
+function connectedEmployee(props) {
   const [state, setState] = React.useState({
     columns: [
       {
@@ -140,17 +141,14 @@ export default function Customer() {
   }, []);
   return (
     <div style={{ padding: "10px 15px" }}>
-      {state.alert.message !== "" ? (
-        <CustomAlert
-          open={state.open}
-          autoHideDuration={2000}
-          type={state.alert.type}
-          onClose={handleCloseAlert}
-          message={state.alert.message}
-        />
-      ) : (
-        <></>
-      )}
+      {props.alert.message &&
+        <Alert
+          severity={`${props.alert.type}`}
+          style={{ marginBottom: "10px" }}
+        >
+          {props.alert.message}
+        </Alert>
+      }
       <div>
         <MaterialTable
           title="Employee Managemnent"
@@ -169,6 +167,7 @@ export default function Customer() {
                     });
                   } else {
                     console.log(newUserMsg.message);
+                    props.alertError(newUserMsg.message);
                   }
                   resolve();
                 }, 600);
@@ -318,3 +317,21 @@ export default function Customer() {
     </div>
   );
 }
+const mapStateToProps = (state) => {
+  const { alert } = state;
+  return {
+    alert,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    alertSuccess: (message) => dispatch(alertActions.success(message)),
+    alertError: (message) => dispatch(alertActions.error(message)),
+    alertClear: () => dispatch(alertActions.clear()),
+  };
+};
+const Employee = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(connectedEmployee);
+export default Employee;
