@@ -26,6 +26,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { validateService } from "../../_services/validate.service";
+import CustomAlert from "../../_components/common/CustomAlert";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -73,9 +74,9 @@ export default function Customer() {
         title: "Role",
         field: "roles",
         lookup: {
-          ROLE_ADMIN: "ROLE_ADMIN",
-          ROLE_CASHIER: "ROLE_CASHIER",
-          ROLE_MANAGER: "ROLE_MANAGER",
+          ROLE_ADMIN: "ADMIN",
+          ROLE_CASHIER: "CASHIER",
+          ROLE_MANAGER: "MANAGER",
         },
       },
       {
@@ -105,11 +106,14 @@ export default function Customer() {
       },
     ],
     alert: { type: "", message: "" },
+    open: true,
     data: [],
     userResetPass: "",
   });
   const [open, setOpen] = React.useState(false);
-
+  const handleCloseAlert = () => {
+    setState({ ...state, open: false });
+  };
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -137,12 +141,13 @@ export default function Customer() {
   return (
     <div style={{ padding: "10px 15px" }}>
       {state.alert.message !== "" ? (
-        <Alert
-          severity={`${state.alert.type}`}
-          style={{ marginBottom: "10px" }}
-        >
-          {state.alert.message.toUpperCase()}
-        </Alert>
+        <CustomAlert
+          open={state.open}
+          autoHideDuration={2000}
+          type={state.alert.type}
+          onClose={handleCloseAlert}
+          message={state.alert.message}
+        />
       ) : (
         <></>
       )}
@@ -170,12 +175,6 @@ export default function Customer() {
               }),
             onRowUpdate: (newData, oldData) =>
               new Promise(async (resolve, reject) => {
-                // let check1 = await JSON.stringify(
-                //   Object.assign({}, { ...newData, tableData: "" })
-                // );
-                // let check2 = await JSON.stringify(
-                //   Object.assign({}, { ...oldData, tableData: "" })
-                // );
                 console.log(await validateService.validateEmail(newData.email));
                 console.log(
                   await validateService.validateMobileNumber(newData.mobileNo)
@@ -184,6 +183,7 @@ export default function Customer() {
                   setState((prevState) => {
                     return {
                       ...prevState,
+                      open: true,
                       alert: {
                         type: "error",
                         message: "Your data is the same as before!",
@@ -195,6 +195,7 @@ export default function Customer() {
                   setState((prevState) => {
                     return {
                       ...prevState,
+                      open: true,
                       alert: {
                         type: "error",
                         message: "Please enter valid email!",
@@ -208,6 +209,7 @@ export default function Customer() {
                   setState((prevState) => {
                     return {
                       ...prevState,
+                      open: true,
                       alert: {
                         type: "error",
                         message: "Please enter valid phone number!",
