@@ -29,7 +29,7 @@ async function addUser(newData) {
     // console.log(roles);
   }
   newData = await { ...newData, roles: roles, password: "1" };
-  console.log(newData);
+  // console.log(newData);
   const requestOption = {
     method: "POST",
     headers: authHeaderWithCT(),
@@ -48,9 +48,9 @@ async function addUser(newData) {
 }
 async function updateUser(newData) {
   if (!Array.isArray(newData.roles)) {
+    console.log(newData.roles);
     let roles = [];
     roles.push(newData.roles);
-    // console.log(roles);
     newData.roles = await roles;
   }
   const requestOption = {
@@ -58,6 +58,7 @@ async function updateUser(newData) {
     headers: authHeaderWithCT(),
     body: JSON.stringify(newData),
   };
+  console.log(requestOption);
   return fetch(
     `${process.env.REACT_APP_SERVER_URL}/api/v1/users/${newData.id}`,
     requestOption

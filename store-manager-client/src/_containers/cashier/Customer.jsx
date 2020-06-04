@@ -17,8 +17,10 @@ import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import { customerService } from "../../_services/customer.service";
-import Alert from "@material-ui/lab/Alert";
+import { connect } from "react-redux";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import { alertActions } from "../../_actions/alert.actions";
+import CustomAlert from "../../_components/common/CustomAlert";
 import "./style.css";
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -45,7 +47,7 @@ const tableIcons = {
   VpnKeyIcon: forwardRef((props, ref) => <VpnKeyIcon {...props} ref={ref} />),
 };
 
-export default function Customer() {
+function connectedCustomer(props) {
   const [state, setState] = React.useState({
     columns: [
       {
@@ -72,21 +74,29 @@ export default function Customer() {
     alert: { type: "", message: "" },
     data: [],
   });
+  const handleCloseAlert = () => {
+    setState({ ...state, open: false });
+  };
   useEffect(() => {
     new Promise(async (resolve, reject) => {
       var result = await customerService.getAll();
+      if (result.success == false) {
+        props.alertError(result.message);
+      }
       resolve();
-      setState({ ...state, page: 0, data: result.customers });
+      setState({ ...state, page: 0, data: result.customers, open: true });
     });
   }, []);
   return (
     <div>
-      {state.alert.message !== "" ? (
-        <Alert severity={`${state.alert.type}`}>
-          {state.alert.message.toUpperCase()}
-        </Alert>
-      ) : (
-        <></>
+      {props.alert.message && (
+        <CustomAlert
+          open={state.open}
+          autoHideDuration={2000}
+          type={props.alert.type}
+          onClose={handleCloseAlert}
+          message={props.alert.message.toUpperCase()}
+        />
       )}
       <div style={{ padding: "10px 15px" }}>
         <MaterialTable
@@ -95,7 +105,7 @@ export default function Customer() {
           data={state.data}
           editable={{
             onRowAdd: (newData) =>
-              new Promise((resolve) => {
+              new Promise((resolve, reject) => {
                 setTimeout(async () => {
                   let newCustomerMsg = await customerService.addCustomer(
                     newData
@@ -104,12 +114,15 @@ export default function Customer() {
                     setState((prevState) => {
                       const data = [...prevState.data];
                       data.push({ ...newData, id: newCustomerMsg.id });
-                      return { ...prevState, data };
+                      return { ...prevState, data, open: true };
                     });
+                    props.alertSuccess("Created sucessful!");
+                    resolve();
                   } else {
-                    console.log(newCustomerMsg.message);
+                    setState({ ...state, open: true });
+                    props.alertError(newCustomerMsg.message);
+                    reject();
                   }
-                  resolve();
                 }, 600);
               }),
             onRowUpdate: (newData, oldData) =>
@@ -121,13 +134,15 @@ export default function Customer() {
                       let dataUpdate = [...prevState.data];
                       let index = oldData.tableData.id;
                       dataUpdate[index] = newData;
-                      return { ...prevState, data: dataUpdate };
+                      return { ...prevState, data: dataUpdate, open: true };
                     });
+                    props.alertSuccess(updateMsg.message);
+                    resolve();
                   } else {
-                    console.log(updateMsg.message);
+                    setState({ ...state, open: true });
+                    props.alertError(updateMsg.message);
+                    reject();
                   }
-
-                  resolve();
                 }, 600);
               }),
             onRowDelete: (oldData) =>
@@ -141,13 +156,15 @@ export default function Customer() {
                       let dataDelete = [...prevState.data];
                       let index = oldData.tableData.id;
                       dataDelete.splice(index, 1);
-                      return { ...prevState, data: dataDelete };
+                      return { ...prevState, data: dataDelete, open: true };
                     });
+                    props.alertSuccess(msgRemove.message);
+                    resolve();
                   } else {
-                    console.log(msgRemove.message);
+                    setState({ ...state, open: true });
+                    props.alertError(msgRemove.message);
+                    reject();
                   }
-
-                  resolve();
                 }, 600);
               }),
           }}
@@ -166,3 +183,21 @@ export default function Customer() {
     </div>
   );
 }
+const mapStateToProps = (state) => {
+  const { alert } = state;
+  return {
+    alert,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    alertSuccess: (message) => dispatch(alertActions.success(message)),
+    alertError: (message) => dispatch(alertActions.error(message)),
+    alertClear: () => dispatch(alertActions.clear()),
+  };
+};
+const Customer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(connectedCustomer);
+export default Customer;
