@@ -246,6 +246,7 @@ class userProfile extends React.Component {
                   label="Salary"
                   fullWidth
                   variant="outlined"
+                  disabled
                   type="number"
                   defaultValue={userProfile.salary && `${userProfile.salary}`}
                   onChange={this.handleChange("salary")}
@@ -263,6 +264,7 @@ class userProfile extends React.Component {
                   label="Role"
                   fullWidth
                   variant="outlined"
+                  disabled
                 />
               ) : (
                 <Skeleton animation="wave" height={50} />
