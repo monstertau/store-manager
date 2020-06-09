@@ -10,6 +10,7 @@ import { PublicRoute } from "../../_components/PublicRoute";
 import { userProfile } from "../user-profile";
 import Customer from "../cashier/Customer";
 import Employee from "../employee/Employee";
+import { Supplier } from "../supplier/Supplier";
 export function App(props) {
   // const [setAnchorEl] = React.useState(null);
 
@@ -22,7 +23,7 @@ export function App(props) {
         <PrivateRoute component={Customer} path="/customers" exact />
         <PrivateRoute component={LogOut} path="/logout" exact />
         <PrivateRoute component={userProfile} path="/profile" />
-
+        <PrivateRoute component={Supplier} path="/supplier" />
         <PublicRoute component={Login} path="/login" exact />
       </Switch>
     </BrowserRouter>
