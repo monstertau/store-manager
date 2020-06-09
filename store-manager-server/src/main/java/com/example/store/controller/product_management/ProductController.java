@@ -36,6 +36,7 @@ public class ProductController {
     @Autowired
     ProductRepository productRepository;
 
+
     // Admin, Manager create a new product type
     @PostMapping("/products")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
