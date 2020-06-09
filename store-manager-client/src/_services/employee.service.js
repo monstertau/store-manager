@@ -5,7 +5,6 @@ export const employeeService = {
   addUser,
   updateUser,
   deleteUser,
-  compareUser,
 };
 async function getAll() {
   const requestOption = {
@@ -47,12 +46,11 @@ async function addUser(newData) {
     });
 }
 async function updateUser(newData) {
-  if (!Array.isArray(newData.roles)) {
-    console.log(newData.roles);
-    let roles = [];
-    roles.push(newData.roles);
-    newData.roles = await roles;
-  }
+  // let roles = [];
+  // if (!Array.isArray(newData.roles)) {
+  // roles.push(newData.roles);
+  // }
+  newData.roles = await Object.values(newData.roles);
   const requestOption = {
     method: "PUT",
     headers: authHeaderWithCT(),
@@ -82,10 +80,4 @@ async function deleteUser(id) {
       // console.log(data);
       return data;
     });
-}
-async function compareUser(user1, user2) {
-  return (
-    JSON.stringify(Object.assign({}, { ...user1, tableData: "" })) ===
-    JSON.stringify(Object.assign({}, { ...user2, tableData: "" }))
-  );
 }

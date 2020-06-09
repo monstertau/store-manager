@@ -29,7 +29,7 @@ import CustomAlert from "../../_components/common/CustomAlert";
 import { validateService } from "../../_services/validate.service";
 import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
-
+import "./employee.css";
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -93,17 +93,15 @@ function connectedEmployee(props) {
         title: "Salary",
         field: "salary",
         type: "numeric",
-        a: "1%",
+        width: "10%",
         cellStyle: {
           // whiteSpace: "nowrap",
-          paddingLeft: 0,
-          paddingRight: "3rem",
+          paddingLeft: "1rem",
           // textAlign: "center",
         },
         headerStyle: {
           // textAlign: "left",
-          paddingLeft: 0,
-          paddingRight: "3rem",
+          paddingLeft: "1rem",
         },
       },
     ],
@@ -141,6 +139,7 @@ function connectedEmployee(props) {
     setState({ ...state, open: true });
   };
   useEffect(() => {
+    props.alertClear();
     new Promise(async (resolve, reject) => {
       var result = await employeeService.getAll();
       if (result.success == false) {
@@ -220,7 +219,7 @@ function connectedEmployee(props) {
             onRowUpdate: (newData, oldData) =>
               new Promise(async (resolve, reject) => {
                 setTimeout(async () => {
-                  if (await employeeService.compareUser(newData, oldData)) {
+                  if (await validateService.compareUser(newData, oldData)) {
                     setState((prevState) => {
                       props.alertError("There are no change from before!");
                       return {
@@ -280,7 +279,7 @@ function connectedEmployee(props) {
                 }, 600);
               }),
             onRowDelete: (oldData) =>
-              new Promise((resolve) => {
+              new Promise((resolve,reject) => {
                 setTimeout(async () => {
                   var msgRemove = await employeeService.deleteUser(oldData.id);
                   if (msgRemove.success === true) {
@@ -299,6 +298,7 @@ function connectedEmployee(props) {
                       };
                     });
                     props.alertError(msgRemove.message);
+                    reject()
                   }
                   resolve();
                 }, 600);

@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React, { useEffect, forwardRef } from "react";
-import MaterialTable from "material-table";
+import MaterialTable, { MTableBody } from "material-table";
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Check from "@material-ui/icons/Check";
@@ -16,13 +16,14 @@ import Remove from "@material-ui/icons/Remove";
 import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
-import { customerService } from "../../_services/customer.service";
+import { inventoryService } from "../../_services/inventory.service";
 import { connect } from "react-redux";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
 import { alertActions } from "../../_actions/alert.actions";
 import CustomAlert from "../../_components/common/CustomAlert";
-import "./style.css";
 import { validateService } from "../../_services/validate.service";
+import TablePagination from "@material-ui/core/TablePagination";
+import "./inventory.css";
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -48,45 +49,149 @@ const tableIcons = {
   VpnKeyIcon: forwardRef((props, ref) => <VpnKeyIcon {...props} ref={ref} />),
 };
 
-function connectedCustomer(props) {
+function connectedInventory(props) {
   const [state, setState] = React.useState({
     columns: [
       {
         title: "ID",
         field: "id",
         editable: "never",
-        width: "1%",
+        width: "8%",
         cellStyle: { whiteSpace: "nowrap" },
+        filterCellStyle: { display: "hidden" },
       },
       {
         title: "Name",
         field: "name",
+        width: "25%",
+        cellStyle: {
+          minWidth: "18rem",
+        },
+        headerStyle: { minWidth: "18rem" },
       },
-      { title: "Email", field: "email" },
       {
-        title: "Mobile Number",
-        field: "mobileNo",
+        title: "Unit",
+        field: "unit",
+        width: "20%",
       },
       {
-        title: "Address",
-        field: "address",
+        title: "Barcode",
+        field: "barcode",
+        width: "20%",
+      },
+      {
+        title: "Price",
+        field: "price",
+        type: "numeric",
+        width: "15%",
+      },
+      {
+        width: "10%",
+        title: "Quantities",
+        field: "quantities",
+        type: "numeric",
+        cellStyle: {
+          paddingLeft: "15px",
+          width: "100px",
+          whiteSpace: "nowrap",
+        },
       },
     ],
-    alert: { type: "", message: "" },
     data: [],
+    // search: {
+    //   value: "",
+    //   name: "",
+    //   unit: "",
+    //   barcode: "",
+    // },
+    search: "",
+    pageNumber: 0,
+    numberRowPerPage: 5,
+    recordsTotal: 0,
   });
+  const handleChangeSearch = async (e) => {
+    new Promise(async (resolve, reject) => {
+      let result = await inventoryService.getProduct(
+        0,
+        state.numberRowPerPage,
+        e
+      );
+      if (result.success === false) {
+        props.alertError(result.message);
+        reject();
+      } else {
+        setState({
+          ...state,
+          data: result.data,
+          recordsTotal: result.recordsFiltered,
+          pageNumber: 0,
+          search: e,
+        });
+        resolve();
+      }
+    });
+  };
+  const handleChangePage = async (page) => {
+    new Promise(async (resolve, reject) => {
+      let result = await inventoryService.getProduct(
+        state.numberRowPerPage * page,
+        state.numberRowPerPage,
+        state.search
+      );
+      if (result.success === false) {
+        props.alertError(result.message);
+        reject();
+      } else {
+        setState({
+          ...state,
+          data: result.data,
+          recordsTotal: result.recordsFiltered,
+          pageNumber: page,
+        });
+        resolve();
+      }
+    });
+  };
+  const handleChangeRowPerPage = async (pageSize) => {
+    props.alertClear();
+    new Promise(async (resolve, reject) => {
+      let result = await inventoryService.getProduct(0, pageSize, state.search);
+      if (result.success == false) {
+        props.alertError(result.message);
+        reject();
+      } else {
+        setState({
+          ...state,
+          data: result.data,
+          recordsTotal: result.recordsFiltered,
+          pageNumber: 0,
+          numberRowPerPage: pageSize,
+        });
+        resolve();
+      }
+    });
+  };
   const handleCloseAlert = () => {
     setState({ ...state, open: false });
   };
   useEffect(() => {
     props.alertClear();
     new Promise(async (resolve, reject) => {
-      var result = await customerService.getAll();
+      var result = await inventoryService.getProduct(
+        state.pageNumber,
+        state.numberRowPerPage,
+        state.search
+      );
       if (result.success == false) {
         props.alertError(result.message);
       }
+      setState({
+        ...state,
+        data: result.data,
+        recordsTotal: result.recordsFiltered,
+        open: true,
+      });
       resolve();
-      setState({ ...state, page: 0, data: result.customers, open: true });
     });
   }, []);
   return (
@@ -102,46 +207,48 @@ function connectedCustomer(props) {
       )}
       <div style={{ padding: "10px 15px" }}>
         <MaterialTable
-          title="Customer"
+          title="Inventory"
           columns={state.columns}
           data={state.data}
           editable={{
             onRowAdd: (newData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  if (
-                    newData.email &&
-                    (await validateService.validateEmail(newData.email))
-                  ) {
-                    props.alertError("Invalid input Email!");
-                    setState({ ...state, open: true });
-                    return reject();
-                  } else if (
-                    newData.mobileNo &&
-                    (await validateService.validateMobileNumber(
-                      newData.mobileNo
-                    ))
-                  ) {
-                    props.alertError("Invalid input phone number!");
-                    setState({ ...state, open: true });
-                    return reject();
-                  } else {
-                    let newCustomerMsg = await customerService.addCustomer(
-                      newData
+                  let newProductMsg = await inventoryService.addProduct(
+                    newData
+                  );
+                  if (newProductMsg.success === true) {
+                    props.alertSuccess("Created sucessful!");
+                    var result = await inventoryService.getProduct(
+                      0,
+                      state.numberRowPerPage,
+                      ""
                     );
-                    if (newCustomerMsg.success === true) {
-                      setState((prevState) => {
-                        const data = [...prevState.data];
-                        data.push({ ...newData, id: newCustomerMsg.id });
-                        return { ...prevState, data, open: true };
-                      });
-                      props.alertSuccess("Created sucessful!");
-                      resolve();
-                    } else {
-                      setState({ ...state, open: true });
-                      props.alertError(newCustomerMsg.message);
-                      reject();
-                    }
+                    setState((prevState) => {
+                      // const data = [...prevState.data];
+                      // data.push({ ...newData, id: newProductMsg.id });
+                      return {
+                        ...prevState,
+                        data: result.data,
+                        recordsTotal: resolve.recordsTotal,
+                        pageNumber: Math.ceil(
+                          state.recordsTotal / state.numberRowPerPage
+                        ),
+                        open: true,
+                      };
+                    });
+                    handleChangePage(
+                      state.recordsTotal % state.numberRowPerPage == 0
+                        ? Math.ceil(state.recordsTotal / state.numberRowPerPage)
+                        : Math.ceil(
+                            state.recordsTotal / state.numberRowPerPage
+                          ) - 1
+                    );
+                    resolve();
+                  } else {
+                    setState({ ...state, open: true });
+                    props.alertError(newProductMsg.message);
+                    reject();
                   }
                 }, 600);
               }),
@@ -152,23 +259,8 @@ function connectedCustomer(props) {
                     props.alertError("There are no change from before!");
                     setState({ ...state, open: true });
                     return reject();
-                  } else if (
-                    await validateService.validateEmail(newData.email)
-                  ) {
-                    props.alertError("Invalid input Email!");
-                    setState({ ...state, open: true });
-                    return reject();
-                  } else if (
-                    newData.mobileNo &&
-                    (await validateService.validateMobileNumber(
-                      newData.mobileNo
-                    ))
-                  ) {
-                    props.alertError("Invalid input phone number!");
-                    setState({ ...state, open: true });
-                    return reject();
                   } else {
-                    var updateMsg = await customerService.updateCustomer(
+                    var updateMsg = await inventoryService.updateProduct(
                       newData
                     );
                     if (updateMsg.success === true) {
@@ -191,7 +283,7 @@ function connectedCustomer(props) {
             onRowDelete: (oldData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  let msgRemove = await customerService.deleteCustomer(
+                  let msgRemove = await inventoryService.deleteProduct(
                     oldData.id
                   );
                   if (msgRemove.success === true) {
@@ -212,15 +304,53 @@ function connectedCustomer(props) {
               }),
           }}
           options={{
-            search: true,
+            // search: true,
             actionsColumnIndex: -1,
-            pageSizeOptions: [5, 10, 15],
+            // pageSizeOptions: [5, 10, 15],
             headerStyle: {
               backgroundColor: "#EEE",
               fontSize: "16px",
             },
+            // filtering: true,
+            // tableLayout: "auto",
+            emptyRowsWhenPaging: true,
           }}
           icons={tableIcons}
+          onSearchChange={handleChangeSearch}
+          // localization={{
+          //   pagination: {
+          //     labelDisplayedRows: '{from}-{to} of filtered {count} records':''},
+          //   },
+          // }}
+          components={{
+            Pagination: (props) => (
+              <TablePagination
+                {...props}
+                rowsPerPageOptions={[5, 10, 15]}
+                rowsPerPage={state.numberRowPerPage}
+                count={state.recordsTotal}
+                // page={firstLoad ? state.pageNumber : state.pageNumber - 1}
+                page={state.pageNumber}
+                onChangePage={(e, page) => {
+                  handleChangePage(page);
+                }}
+                onChangeRowsPerPage={(event) => {
+                  props.onChangeRowsPerPage(event);
+                  handleChangeRowPerPage(event.target.value);
+                }}
+              />
+            ),
+            // Body: (props) => (
+            //   <MTableBody
+            //     {...props}
+            //     onFilterChanged={async (columnId, value) => {
+            //       props.onFilterChanged(columnId, value);
+            //       console.log(columnId, value);
+            //       setState({ ...state, search: {} });
+            //     }}
+            //   />
+            // ),
+          }}
         />
       </div>
     </div>
@@ -239,8 +369,8 @@ const mapDispatchToProps = (dispatch) => {
     alertClear: () => dispatch(alertActions.clear()),
   };
 };
-const Customer = connect(
+const Inventory = connect(
   mapStateToProps,
   mapDispatchToProps
-)(connectedCustomer);
-export default Customer;
+)(connectedInventory);
+export default Inventory;

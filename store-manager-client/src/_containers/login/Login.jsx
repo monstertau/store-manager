@@ -17,6 +17,7 @@ import { userActions } from "../../_actions/user.actions";
 import { Redirect } from "react-router-dom";
 import Alert from "@material-ui/lab/Alert";
 import { CircularProgress } from "@material-ui/core";
+import { alertActions } from "../../_actions/alert.actions";
 
 function Copyright() {
   return (
@@ -74,6 +75,9 @@ class SignInSide extends React.Component {
     this.handleUserNameChange.bind(this);
     this.handlePasswordChange.bind(this);
     this.handleSubmitChange.bind(this);
+  }
+  componentDidMount() {
+    this.props.alertClear();
   }
   handleUserNameChange = (e) => {
     e.preventDefault();
@@ -163,8 +167,7 @@ class SignInSide extends React.Component {
                 onClick={this.handleSubmitChange}
                 disable={`${loggingIn}`}
               >
-                
-                {loggingIn ? <CircularProgress color="secondary"/> : "Sign In"}
+                {loggingIn ? <CircularProgress color="secondary" /> : "Sign In"}
               </Button>
               {alert.message && (
                 <Alert severity={`${alert.type}`}>{alert.message}</Alert>
@@ -194,6 +197,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     login: (username, password) =>
       dispatch(userActions.login(username, password)),
+    alertClear: () => dispatch(alertActions.clear()),
   };
 };
 const Login = withStyles(useStyles)(SignInSide);

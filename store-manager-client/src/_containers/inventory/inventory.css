@@ -1,0 +1,3 @@
+.MuiTableCell-body:first-child .MuiInputBase-adornedStart:first-child {
+  display: none;
+}
