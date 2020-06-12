@@ -1,83 +1,53 @@
-/* eslint-disable */
-import React, { useEffect, } from "react";
+import React, { useEffect, forwardRef } from "react";
 import MaterialTable from "material-table";
-import { inventoryService } from "../../_services/inventory.service";
 import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
+import { invoiceService } from "../../_services";
 import CustomAlert from "../../_components/common/CustomAlert";
-import { validateService } from "../../_services/validate.service";
+import { debounce } from "@material-ui/core";
 import TablePagination from "@material-ui/core/TablePagination";
-import "./inventory.css";
-import { debounce } from "lodash";
+import { validateService } from "../../_services/validate.service";
 import tableIcons from "../../_utils/tableIcon";
 
-function connectedInventory(props) {
+const column = [
+  {
+    title: "ID",
+    field: "id",
+    editable: "never",
+    width: "1%",
+    cellStyle: { whiteSpace: "nowrap" },
+  },
+  {
+    title: "Purpose",
+    field: "purpose",
+    required: true,
+  },
+  { title: "Create At", field: "createdAt", required: true },
+  {
+    title: "Description",
+    field: "description",
+  },
+  {
+    title: "Amount",
+    field: "amount",
+    type: "numeric",
+    width: "10%",
+  },
+];
+function ConnectedInvoice(props) {
   const [state, setState] = React.useState({
-    columns: [
-      {
-        title: "ID",
-        field: "id",
-        editable: "never",
-        width: "8%",
-        cellStyle: { whiteSpace: "nowrap" },
-        filterCellStyle: { display: "hidden" },
-      },
-      {
-        title: "Name",
-        field: "name",
-        width: "25%",
-        cellStyle: {
-          minWidth: "18rem",
-        },
-        headerStyle: { minWidth: "18rem" },
-        required: true,
-      },
-      {
-        title: "Unit",
-        field: "unit",
-        width: "20%",
-      },
-      {
-        title: "Barcode",
-        field: "barcode",
-        width: "20%",
-      },
-      {
-        title: "Price",
-        field: "price",
-        type: "numeric",
-        width: "15%",
-      },
-      {
-        width: "10%",
-        title: "Quantities",
-        field: "quantities",
-        type: "numeric",
-        cellStyle: {
-          paddingLeft: "15px",
-          width: "100px",
-          whiteSpace: "nowrap",
-        },
-      },
-    ],
     data: [],
-    // search: {
-    //   value: "",
-    //   name: "",
-    //   unit: "",
-    //   barcode: "",
-    // },
-    search: "",
+    search: {},
     pageNumber: 0,
     numberRowPerPage: 5,
     recordsTotal: 0,
   });
   const handleChangeSearch = async (e) => {
     new Promise(async (resolve, reject) => {
-      let result = await inventoryService.getProduct(
+      let result = await invoiceService.searchInvoice(
         0,
         state.numberRowPerPage,
-        e
+        { purpose: e, description: e }
       );
       if (result.success === false) {
         props.alertError(result.message);
@@ -88,15 +58,18 @@ function connectedInventory(props) {
           data: result.data,
           recordsTotal: result.recordsFiltered,
           pageNumber: 0,
-          search: e,
+          search: { purpose: e, description: e },
         });
         resolve();
       }
     });
   };
+  const handleCloseAlert = () => {
+    setState({ ...state, open: false });
+  };
   const handleChangePage = async (page) => {
     new Promise(async (resolve, reject) => {
-      let result = await inventoryService.getProduct(
+      let result = await invoiceService.searchInvoice(
         state.numberRowPerPage * page,
         state.numberRowPerPage,
         state.search
@@ -118,7 +91,11 @@ function connectedInventory(props) {
   const handleChangeRowPerPage = async (pageSize) => {
     props.alertClear();
     new Promise(async (resolve, reject) => {
-      let result = await inventoryService.getProduct(0, pageSize, state.search);
+      let result = await invoiceService.searchInvoice(
+        0,
+        pageSize,
+        state.search
+      );
       if (result.success == false) {
         props.alertError(result.message);
         reject();
@@ -134,13 +111,10 @@ function connectedInventory(props) {
       }
     });
   };
-  const handleCloseAlert = () => {
-    setState({ ...state, open: false });
-  };
   useEffect(() => {
     props.alertClear();
     new Promise(async (resolve, reject) => {
-      var result = await inventoryService.getProduct(
+      var result = await invoiceService.searchInvoice(
         state.pageNumber,
         state.numberRowPerPage,
         state.search
@@ -158,7 +132,7 @@ function connectedInventory(props) {
     });
   }, []);
   return (
-    <div>
+    <div style={{ padding: "10px 15px" }}>
       {props.alert.message && (
         <CustomAlert
           open={state.open}
@@ -168,28 +142,25 @@ function connectedInventory(props) {
           message={props.alert.message.toUpperCase()}
         />
       )}
-      <div style={{ padding: "10px 15px" }}>
+      <div>
         <MaterialTable
-          title="Inventory"
-          columns={state.columns}
-          data={state.data}
+          title="Invoice Management"
+          columns={column}
           editable={{
             onRowAdd: (newData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  let newProductMsg = await inventoryService.addProduct(
+                  let newSuppilierMsg = await invoiceService.createInvoice(
                     newData
                   );
-                  if (newProductMsg.success === true) {
+                  if (newSuppilierMsg.success === true) {
                     props.alertSuccess("Created sucessful!");
-                    var result = await inventoryService.getProduct(
+                    var result = await invoiceService.searchInvoice(
                       0,
                       state.numberRowPerPage,
                       ""
                     );
                     setState((prevState) => {
-                      // const data = [...prevState.data];
-                      // data.push({ ...newData, id: newProductMsg.id });
                       return {
                         ...prevState,
                         data: result.data,
@@ -210,7 +181,7 @@ function connectedInventory(props) {
                     resolve();
                   } else {
                     setState({ ...state, open: true });
-                    props.alertError(newProductMsg.message);
+                    props.alertError(newSuppilierMsg.message);
                     reject();
                   }
                 }, 600);
@@ -223,9 +194,7 @@ function connectedInventory(props) {
                     setState({ ...state, open: true });
                     return reject();
                   } else {
-                    var updateMsg = await inventoryService.updateProduct(
-                      newData
-                    );
+                    var updateMsg = await invoiceService.updateInvoice(newData);
                     if (updateMsg.success === true) {
                       setState((prevState) => {
                         let dataUpdate = [...prevState.data];
@@ -246,7 +215,7 @@ function connectedInventory(props) {
             onRowDelete: (oldData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  let msgRemove = await inventoryService.deleteProduct(
+                  let msgRemove = await invoiceService.deleteInvoice(
                     oldData.id
                   );
                   if (msgRemove.success === true) {
@@ -269,22 +238,22 @@ function connectedInventory(props) {
           options={{
             // search: true,
             actionsColumnIndex: -1,
-            // pageSizeOptions: [5, 10, 15],
+            pageSizeOptions: [5, 10, 15],
             headerStyle: {
               backgroundColor: "#EEE",
               fontSize: "16px",
             },
-            // filtering: true,
-            // tableLayout: "auto",
             emptyRowsWhenPaging: true,
+            actionsCellStyle: {
+              // display: "flex",
+              // justifyContent: "center",
+              paddingLeft: 16,
+              // width: "100%",
+            },
           }}
           icons={tableIcons}
+          data={state.data}
           onSearchChange={debounce(handleChangeSearch, 600)}
-          // localization={{
-          //   pagination: {
-          //     labelDisplayedRows: '{from}-{to} of filtered {count} records':''},
-          //   },
-          // }}
           components={{
             Pagination: (props) => (
               <TablePagination
@@ -303,16 +272,6 @@ function connectedInventory(props) {
                 }}
               />
             ),
-            // Body: (props) => (
-            //   <MTableBody
-            //     {...props}
-            //     onFilterChanged={async (columnId, value) => {
-            //       props.onFilterChanged(columnId, value);
-            //       console.log(columnId, value);
-            //       setState({ ...state, search: {} });
-            //     }}
-            //   />
-            // ),
           }}
         />
       </div>
@@ -332,8 +291,5 @@ const mapDispatchToProps = (dispatch) => {
     alertClear: () => dispatch(alertActions.clear()),
   };
 };
-const Inventory = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(connectedInventory);
-export default Inventory;
+const Invoice = connect(mapStateToProps, mapDispatchToProps)(ConnectedInvoice);
+export { Invoice };

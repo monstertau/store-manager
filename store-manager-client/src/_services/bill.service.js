@@ -1,28 +1,38 @@
 import { authHeader, authHeaderWithCT } from "../_utils";
-
-export const supplierService = {
-  createSupplier,
-  getSupplierInfo,
-  updateSupplierInfo,
-  deleteSupplier,
-  searchSupplier,
+export const billService = {
+  createNewBuy,
+  searchBuy,
+  updateBuy,
+  deleteBuy,
 };
-async function searchSupplier(start, length, search) {
-  const draw = {
-    draw: 1,
-    start: start,
-    length: length,
-    search: {
-      value: search,
-    },
-  };
+
+async function createNewBuy(newBuy) {
   const requestOption = {
     method: "POST",
     headers: authHeaderWithCT(),
-    body: JSON.stringify(draw),
+    body: JSON.stringify(newBuy),
+  };
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/buys`, requestOption)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+      return data;
+    });
+}
+
+async function searchBuy(start, length, search) {
+  const requestOption = {
+    method: "POST",
+    headers: authHeaderWithCT(),
+    body: JSON.stringify({
+      draw: "1",
+      start: start,
+      length: length,
+      search: search,
+    }),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/search/suppliers`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/search/buys`,
     requestOption
   )
     .then((res) => res.json())
@@ -31,29 +41,14 @@ async function searchSupplier(start, length, search) {
       return data;
     });
 }
-function createSupplier(supplier) {
-  const requestOption = {
-    method: "POST",
-    headers: authHeaderWithCT(),
-    body: JSON.stringify(supplier),
-  };
-  return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/suppliers`,
-    requestOption
-  )
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-      return data;
-    });
-}
-function getSupplierInfo(id) {
+
+async function getBuyInfo(id) {
   const requestOption = {
     method: "GET",
     headers: authHeader(),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/suppliers/${id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/buys/${id}`,
     requestOption
   )
     .then((res) => res.json())
@@ -62,14 +57,15 @@ function getSupplierInfo(id) {
       return data;
     });
 }
-function updateSupplierInfo(supplier) {
+
+async function updateBuy(buyInfo) {
   const requestOption = {
     method: "PUT",
     headers: authHeaderWithCT(),
-    body: JSON.stringify(supplier),
+    body: JSON.stringify(buyInfo),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/suppliers/${supplier.id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/buys/${buyInfo.id}`,
     requestOption
   )
     .then((res) => res.json())
@@ -78,13 +74,14 @@ function updateSupplierInfo(supplier) {
       return data;
     });
 }
-function deleteSupplier(id) {
+
+async function deleteBuy(id) {
   const requestOption = {
     method: "DELETE",
     headers: authHeader(),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/suppliers/${id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/buys/${id}`,
     requestOption
   )
     .then((res) => res.json())

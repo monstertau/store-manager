@@ -13,6 +13,8 @@ import StoreIcon from "@material-ui/icons/Store";
 import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
 import FaceIcon from "@material-ui/icons/Face";
 import ReceiptIcon from "@material-ui/icons/Receipt";
+import InboxIcon from "@material-ui/icons/Inbox";
+import PaymentIcon from '@material-ui/icons/Payment';
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
@@ -40,11 +42,6 @@ const MainItems = [
     icon: MonetizationOnIcon,
   },
   {
-    primary: "Orders",
-    path: "/orders",
-    icon: ShoppingCartIcon,
-  },
-  {
     primary: "Customers",
     path: "/customers",
     icon: FaceIcon,
@@ -69,7 +66,17 @@ const SecondaryItems = [
   {
     primary: "Inventory",
     path: "/inventory",
+    icon: InboxIcon,
+  },
+  {
+    primary: "Supplier",
+    path: "/Supplier",
     icon: StoreIcon,
+  },
+  {
+    primary: "Invoice",
+    path: "/invoice",
+    icon: PaymentIcon,
   },
 ];
 const ThirdItems = [
