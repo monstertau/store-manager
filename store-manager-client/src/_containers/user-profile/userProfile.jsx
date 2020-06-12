@@ -22,6 +22,8 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import PasswordField from "../../_components/common/PasswordField";
 import { userService } from "../../_services";
 import CustomAlert from "../../_components/common/CustomAlert";
+import { AddCustomer } from "../cashier/addCustomer";
+import SearchWithDate from "../../_components/common/SearchWithDate";
 const useStyles = (theme) => ({
   layout: {
     width: "auto",
@@ -228,6 +230,7 @@ class userProfile extends React.Component {
                   name="mobileNo"
                   label="Mobile Number"
                   fullWidth
+                  type="number"
                   variant="outlined"
                   defaultValue={
                     userProfile.mobileNo && `${userProfile.mobileNo}`
@@ -305,9 +308,17 @@ class userProfile extends React.Component {
                 )}
               </Button>
             </Grid>
+            <Grid item xs={12}>
+              <SearchWithDate/>
+            </Grid>
           </Grid>
         </Paper>
-        <Dialog
+        <AddCustomer
+          open={this.state.openDialog}
+          onClose={this.handleCloseDialog}
+          maxWidth="sm"
+        />
+        {/* <Dialog
           open={this.state.openDialog}
           onClose={this.handleCloseDialog}
           aria-labelledby="form-dialog-title"
@@ -356,7 +367,7 @@ class userProfile extends React.Component {
               Change
             </Button>
           </DialogActions>
-        </Dialog>
+        </Dialog> */}
       </main>
     );
   }

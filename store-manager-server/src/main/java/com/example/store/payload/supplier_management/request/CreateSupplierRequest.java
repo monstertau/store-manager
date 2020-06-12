@@ -2,6 +2,7 @@ package com.example.store.payload.supplier_management.request;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class CreateSupplierRequest {
@@ -10,13 +11,16 @@ public class CreateSupplierRequest {
     @Size(min=4, max=40)
     private String name;
 
+    @NotNull
     @Size(max=40)
     @Email
     private String email;
 
+    @NotNull
     @Size(max=100)
     private String address;
 
+    @NotNull
     private String mobileNo;
 
     public String getName(){

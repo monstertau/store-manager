@@ -50,7 +50,7 @@ public class ProductController {
         Product result = productRepository.save(product);
 
         return new ResponseEntity<>(new CreateProductResponse(result.getId()),
-                                    HttpStatus.OK);
+                                        HttpStatus.OK);
     }
 
     // Admin, Manager get a product type information
