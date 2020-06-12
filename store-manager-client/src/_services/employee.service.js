@@ -5,7 +5,6 @@ export const employeeService = {
   addUser,
   updateUser,
   deleteUser,
-  compareUser,
 };
 async function getAll() {
   const requestOption = {
@@ -29,7 +28,7 @@ async function addUser(newData) {
     // console.log(roles);
   }
   newData = await { ...newData, roles: roles, password: "1" };
-  console.log(newData);
+  // console.log(newData);
   const requestOption = {
     method: "POST",
     headers: authHeaderWithCT(),
@@ -47,17 +46,17 @@ async function addUser(newData) {
     });
 }
 async function updateUser(newData) {
-  if (!Array.isArray(newData.roles)) {
-    let roles = [];
-    roles.push(newData.roles);
-    // console.log(roles);
-    newData.roles = await roles;
-  }
+  // let roles = [];
+  // if (!Array.isArray(newData.roles)) {
+  // roles.push(newData.roles);
+  // }
+  newData.roles = await Object.values(newData.roles);
   const requestOption = {
     method: "PUT",
     headers: authHeaderWithCT(),
     body: JSON.stringify(newData),
   };
+  console.log(requestOption);
   return fetch(
     `${process.env.REACT_APP_SERVER_URL}/api/v1/users/${newData.id}`,
     requestOption
@@ -81,10 +80,4 @@ async function deleteUser(id) {
       // console.log(data);
       return data;
     });
-}
-async function compareUser(user1, user2) {
-  return (
-    JSON.stringify(Object.assign({}, { ...user1, tableData: "" })) ===
-    JSON.stringify(Object.assign({}, { ...user2, tableData: "" }))
-  );
 }

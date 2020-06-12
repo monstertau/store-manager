@@ -10,10 +10,12 @@ import { PublicRoute } from "../../_components/PublicRoute";
 import { userProfile } from "../user-profile";
 import Customer from "../cashier/Customer";
 import Employee from "../employee/Employee";
+import Inventory from "../inventory/Inventory";
+// import Orders from "../report/Order";
+import Report from "../report/Report";
 import { Supplier } from "../supplier/Supplier";
 export function App(props) {
   // const [setAnchorEl] = React.useState(null);
-
   return (
     <BrowserRouter>
       <Switch>
@@ -23,8 +25,10 @@ export function App(props) {
         <PrivateRoute component={Customer} path="/customers" exact />
         <PrivateRoute component={LogOut} path="/logout" exact />
         <PrivateRoute component={userProfile} path="/profile" />
+        <PrivateRoute component={Inventory} path="/inventory" />
         <PrivateRoute component={Supplier} path="/supplier" />
         <PublicRoute component={Login} path="/login" exact />
+        <PrivateRoute component={Report} path="/report" exact />
       </Switch>
     </BrowserRouter>
   );

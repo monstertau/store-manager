@@ -25,10 +25,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import CustomAlert from "../../_components/common/CustomAlert";
 import { validateService } from "../../_services/validate.service";
 import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
-
+import "./employee.css";
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -73,7 +74,7 @@ function connectedEmployee(props) {
       { title: "Email", field: "email", required: true },
       {
         title: "Role",
-        field: "roles",
+        field: "roles[0]",
         lookup: {
           ROLE_ADMIN: "ROLE_ADMIN",
           ROLE_CASHIER: "ROLE_CASHIER",
@@ -92,26 +93,27 @@ function connectedEmployee(props) {
         title: "Salary",
         field: "salary",
         type: "numeric",
-        a: "1%",
+        width: "10%",
         cellStyle: {
           // whiteSpace: "nowrap",
-          paddingLeft: 0,
-          paddingRight: "3rem",
+          paddingLeft: "1rem",
           // textAlign: "center",
         },
         headerStyle: {
           // textAlign: "left",
-          paddingLeft: 0,
-          paddingRight: "3rem",
+          paddingLeft: "1rem",
         },
       },
     ],
     alert: { type: "", message: "" },
+    open: true,
     data: [],
     userResetPass: "",
   });
   const [open, setOpen] = React.useState(false);
-
+  const handleCloseAlert = () => {
+    setState({ ...state, open: false });
+  };
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -119,33 +121,46 @@ function connectedEmployee(props) {
   const handleClose = () => {
     setOpen(false);
   };
+  const setOpenAlert = (prevState) => {
+    return {
+      ...prevState,
+      open: true,
+    };
+  };
   const ResetPassHandler = async (rowData) => {
     // rowData.password = "1";
     rowData.password = "1";
     let resetPassMsg = await employeeService.updateUser(rowData);
     if (resetPassMsg.success === true) {
-      console.log(resetPassMsg.message);
+      props.alertSuccess(resetPassMsg.message);
     } else {
-      console.log(resetPassMsg.message);
+      props.alertError(resetPassMsg.message);
     }
+    setState({ ...state, open: true });
   };
   useEffect(() => {
+    props.alertClear();
     new Promise(async (resolve, reject) => {
       var result = await employeeService.getAll();
+      if (result.success == false) {
+        props.alertError(result.message);
+      }
       resolve();
-      setState({ ...state, page: 0, data: result.users });
+      setState({ ...state, page: 0, data: result.users, open: true });
     });
   }, []);
+
   return (
     <div style={{ padding: "10px 15px" }}>
-      {props.alert.message &&
-        <Alert
-          severity={`${props.alert.type}`}
-          style={{ marginBottom: "10px" }}
-        >
-          {props.alert.message}
-        </Alert>
-      }
+      {props.alert.message && (
+        <CustomAlert
+          open={state.open}
+          autoHideDuration={2000}
+          type={props.alert.type}
+          onClose={handleCloseAlert}
+          message={props.alert.message.toUpperCase()}
+        />
+      )}
       <div>
         <MaterialTable
           title="Employee Managemnent"
@@ -153,99 +168,137 @@ function connectedEmployee(props) {
           data={state.data}
           editable={{
             onRowAdd: (newData) =>
-              new Promise((resolve) => {
+              new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  let newUserMsg = await employeeService.addUser(newData);
-                  if (newUserMsg.success === true) {
+                  if (await validateService.validateEmail(newData.email)) {
+                    props.alertError("Invalid input Email!");
                     setState((prevState) => {
-                      const data = [...prevState.data];
-                      data.push({ ...newData, id: newUserMsg.id });
-                      return { ...prevState, data };
+                      return {
+                        ...prevState,
+                        open: true,
+                      };
                     });
+                    return reject();
+                  } else if (
+                    newData.mobileNo &&
+                    (await validateService.validateMobileNumber(
+                      newData.mobileNo
+                    ))
+                  ) {
+                    props.alertError("Invalid input phone number!");
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        open: true,
+                      };
+                    });
+                    return reject();
                   } else {
-                    console.log(newUserMsg.message);
-                    props.alertError(newUserMsg.message);
+                    let newUserMsg = await employeeService.addUser(newData);
+                    if (newUserMsg.success === true) {
+                      setState((prevState) => {
+                        const data = [...prevState.data];
+                        data.push({ ...newData, id: newUserMsg.id });
+                        return { ...prevState, data, open: true };
+                      });
+                      props.alertSuccess("Created sucessful!");
+                      resolve();
+                    } else {
+                      setState((prevState) => {
+                        return {
+                          ...prevState,
+                          open: true,
+                        };
+                      });
+                      props.alertError(newUserMsg.message);
+                      reject();
+                    }
                   }
-                  resolve();
                 }, 600);
               }),
             onRowUpdate: (newData, oldData) =>
               new Promise(async (resolve, reject) => {
-                // let check1 = await JSON.stringify(
-                //   Object.assign({}, { ...newData, tableData: "" })
-                // );
-                // let check2 = await JSON.stringify(
-                //   Object.assign({}, { ...oldData, tableData: "" })
-                // );
-                console.log(await validateService.validateEmail(newData.email));
-                console.log(
-                  await validateService.validateMobileNumber(newData.mobileNo)
-                );
-                if (await employeeService.compareUser(newData, oldData)) {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      alert: {
-                        type: "error",
-                        message: "Your data is the same as before!",
-                      },
-                    };
-                  });
-                  return reject();
-                } else if (await validateService.validateEmail(newData.email)) {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      alert: {
-                        type: "error",
-                        message: "Please enter valid email!",
-                      },
-                    };
-                  });
-                  return reject();
-                } else if (
-                  await validateService.validateMobileNumber(newData.mobileNo)
-                ) {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      alert: {
-                        type: "error",
-                        message: "Please enter valid phone number!",
-                      },
-                    };
-                  });
-                  return reject();
-                } else {
-                  setTimeout(async () => {
+                setTimeout(async () => {
+                  if (await validateService.compareUser(newData, oldData)) {
+                    setState((prevState) => {
+                      props.alertError("There are no change from before!");
+                      return {
+                        ...prevState,
+                        open: true,
+                      };
+                    });
+                    return reject();
+                  } else if (
+                    await validateService.validateEmail(newData.email)
+                  ) {
+                    props.alertError("Invalid input Email!");
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        open: true,
+                      };
+                    });
+                    return reject();
+                  } else if (
+                    newData.mobileNo &&
+                    (await validateService.validateMobileNumber(
+                      newData.mobileNo
+                    ))
+                  ) {
+                    props.alertError("Invalid input phone number!");
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        open: true,
+                      };
+                    });
+                    return reject();
+                  } else {
                     var updateMsg = await employeeService.updateUser(newData);
                     if (updateMsg.success === true) {
+                      props.alertSuccess(updateMsg.message);
                       setState((prevState) => {
                         let dataUpdate = [...prevState.data];
                         let index = oldData.tableData.id;
                         dataUpdate[index] = newData;
-                        return { ...prevState, data: dataUpdate };
+                        return { ...prevState, data: dataUpdate, open: true };
                       });
+                      // console.log(updateMsg);
                     } else {
-                      console.log(updateMsg.message);
+                      setState((prevState) => {
+                        return {
+                          ...prevState,
+                          open: true,
+                        };
+                      });
+                      props.alertError(updateMsg.message);
+                      reject();
                     }
-                  }, 600);
-                }
-                resolve();
+                  }
+                  resolve();
+                }, 600);
               }),
             onRowDelete: (oldData) =>
-              new Promise((resolve) => {
+              new Promise((resolve,reject) => {
                 setTimeout(async () => {
                   var msgRemove = await employeeService.deleteUser(oldData.id);
                   if (msgRemove.success === true) {
+                    props.alertSuccess(msgRemove.message);
                     setState((prevState) => {
                       let dataDelete = [...prevState.data];
                       let index = oldData.tableData.id;
                       dataDelete.splice(index, 1);
-                      return { ...prevState, data: dataDelete };
+                      return { ...prevState, data: dataDelete, open: true };
                     });
                   } else {
-                    console.log(msgRemove.message);
+                    setState((prevState) => {
+                      return {
+                        ...prevState,
+                        open: true,
+                      };
+                    });
+                    props.alertError(msgRemove.message);
+                    reject()
                   }
                   resolve();
                 }, 600);
