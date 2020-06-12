@@ -44,7 +44,6 @@ public class SupplierController {
                                         createSupplierRequest.getEmail(), 
                                         createSupplierRequest.getAddress(),
                                         createSupplierRequest.getMobileNo());
-
         Supplier result = supplierRepository.save(supplier);
 
         return new ResponseEntity<>(new CreateSupplierResponse(result.getId()),
