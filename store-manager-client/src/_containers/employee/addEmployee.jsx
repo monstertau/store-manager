@@ -22,6 +22,8 @@ import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import BusinessCenterIcon from '@material-ui/icons/BusinessCenter';
+import PasswordField from "../../_components/common/PasswordField";
+import LockIcon from '@material-ui/icons/Lock';
 import {
   Dialog,
   DialogContentText,
@@ -41,7 +43,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 export function AddEmployee(props) {
   const classes = useStyles();
-
+  const [state, setState] = React.useState({
+    name: "",
+    email: "",
+    address: "",
+    mobileNo: "",
+  });
   return (
     <div>
       <Dialog
@@ -116,6 +123,22 @@ export function AddEmployee(props) {
                 </ListItemText>
               </ListItem>
             </Grid>
+            <Grid item xs={12}>
+              <ListItem>
+                <ListItemIcon>
+                  <LockIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText>
+                <PasswordField
+                label="Password"
+                variant="outlined"
+                // onChange={this.handleChange("newPassword")}
+                fullWidth
+              />
+                </ListItemText>
+              </ListItem>
+            </Grid>
+            
             <Grid item xs={12} sm={6}>
               <ListItem>
                 <ListItemIcon>

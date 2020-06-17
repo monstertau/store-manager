@@ -16,6 +16,7 @@ import Report from "../report/Report";
 import { Supplier } from "../supplier/Supplier";
 import { Invoice } from "../invoice/Invoice";
 import { Bill } from "../bill/Bill";
+import CashierUI from "../cashierUI/CashierUI";
 export function App(props) {
   // const [setAnchorEl] = React.useState(null);
   return (
@@ -33,6 +34,7 @@ export function App(props) {
         <PrivateRoute component={Report} path="/report" exact />
         <PrivateRoute component={Invoice} path="/invoice" exact />
         <PrivateRoute component={Bill} path="/bill" exact />
+        <PrivateRoute component={CashierUI} path="/cashierui" exact />
       </Switch>
     </BrowserRouter>
   );
