@@ -1,8 +1,10 @@
 import "date-fns";
 import React, { useEffect } from "react";
+import PropTypes from "prop-types";
 import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
 import Button from "@material-ui/core/Button";
+import { makeStyles } from "@material-ui/core/styles";
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
@@ -10,11 +12,28 @@ import {
 import { connect } from "react-redux";
 import { dateActions } from "../../_actions/date.actions";
 import { alertActions } from "../../_actions/alert.actions";
+import Search from "@material-ui/icons/Search";
 function isValidDate(d) {
   return d instanceof Date && !isNaN(d);
 }
+const useStyles = makeStyles((theme) => ({
+  outlinePicker: {
+    // margin: "0 auto",
+    // marginLeft: "12px",
+    // marginRight: "4rem",
+  },
+  datePicker: {
+    width: "100%",
+  },
+  buttonPicker: {
+    maxWidth: "144px",
+    height: "39px",
+    margin: "auto",
+  },
+}));
 
 function ConnectedSearchWithDate(props) {
+  const classes = useStyles();
   const date = new Date();
   const [state, setState] = React.useState({
     startDate: new Date(date.getFullYear(), date.getMonth(), 1),
@@ -23,10 +42,9 @@ function ConnectedSearchWithDate(props) {
   useEffect(() => {
     new Promise(async (resolve, reject) => {
       await props.dateClear();
-      resolve();
       props.getStartDateSuccess(state.startDate);
-
       props.getEndDateSuccess(state.endDate);
+      resolve();
     });
   }, []);
   const handleStartDateChange = (date) => {
@@ -69,11 +87,12 @@ function ConnectedSearchWithDate(props) {
   };
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <Grid container spacing={3}>
+      <Grid container spacing={4} className={classes.outlinePicker}>
         <Grid container item xs={12} sm={4}>
           <KeyboardDatePicker
             disableToolbar
             variant="inline"
+            className={classes.datePicker}
             format="MM/dd/yyyy"
             margin="normal"
             id="date-picker-inline"
@@ -95,6 +114,7 @@ function ConnectedSearchWithDate(props) {
             label="End Date"
             value={state.endDate}
             onChange={handleEndDateChange}
+            className={classes.datePicker}
             KeyboardButtonProps={{
               "aria-label": "change date",
             }}
@@ -102,22 +122,28 @@ function ConnectedSearchWithDate(props) {
         </Grid>
         <Grid container item xs={12} sm={2}>
           <Button
+            className={classes.buttonPicker}
             variant="contained"
-            color="Primary"
+            size="large"
+            color="primary"
             onClick={handleThisMonthChange}
+            style={{ backgroundColor: "#F27E63" }}
           >
             This month
           </Button>
-        </Grid>
-        <Grid container item xs={12} sm={2}>
-          <Button
+          {/* <Button
+            className={classes.buttonPicker}
             variant="contained"
-            color="Secondary"
-            onClick={handleSubmitDate}
+            size="large"
+            color="primary"
+            onClick={handleThisMonthChange}
+            startIcon={<Search />}
+            style={{ backgroundColor: "#D95284" }}
           >
-            Update
-          </Button>
+            Search
+          </Button> */}
         </Grid>
+        {/* <Grid container item xs={12} sm={2}></Grid> */}
       </Grid>
     </MuiPickersUtilsProvider>
   );
@@ -148,3 +174,7 @@ const SearchWithDate = connect(
   mapDispatchToProps
 )(ConnectedSearchWithDate);
 export default SearchWithDate;
+
+SearchWithDate.prototype = {
+  onSearchChange: PropTypes.func,
+};

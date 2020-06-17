@@ -14,9 +14,10 @@ import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
 import FaceIcon from "@material-ui/icons/Face";
 import ReceiptIcon from "@material-ui/icons/Receipt";
 import InboxIcon from "@material-ui/icons/Inbox";
-import PaymentIcon from '@material-ui/icons/Payment';
+import PaymentIcon from "@material-ui/icons/Payment";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
+import AddBoxIcon from '@material-ui/icons/AddBox';
 const useStyles = makeStyles((theme) => ({
   sidebar: {
     paddingLeft: "1.5rem",
@@ -50,6 +51,11 @@ const MainItems = [
     primary: "Bill",
     path: "/bill",
     icon: ReceiptIcon,
+  },
+  {
+    primary: "Import Product",
+    path: "importProduct",
+    icon: AddBoxIcon,
   },
 ];
 const SecondaryItems = [

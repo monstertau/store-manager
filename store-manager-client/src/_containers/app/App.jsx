@@ -16,7 +16,11 @@ import Report from "../report/Report";
 import { Supplier } from "../supplier/Supplier";
 import { Invoice } from "../invoice/Invoice";
 import { Bill } from "../bill/Bill";
+<<<<<<< HEAD
 import CashierUI from "../cashierUI/CashierUI";
+=======
+import { importProduct } from "../importProduct/importProduct";
+>>>>>>> master
 export function App(props) {
   // const [setAnchorEl] = React.useState(null);
   return (
