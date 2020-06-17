@@ -48,17 +48,28 @@ export default function Orders(props) {
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id} className={classes.heightTable}>
+        <TableBody
+          // style={{ height: "00px", overflow: "auto" }}
+          className="scroll"
+        >
+          {rows.map((row, index) => (
+            <TableRow key={index} className={classes.heightTable} hover={true}>
               {props.data.map((e, index) => {
                 // console.log(e);
                 return e.type == "dotNumber" ? (
-                  <TableCell key={index}>
+                  <TableCell
+                    style={{ padding: "15px 24px 6px 16px" }}
+                    key={index}
+                  >
                     {numberWithCommas(row[e.row])}
                   </TableCell>
                 ) : (
-                  <TableCell key={index}>{row[e.row]}</TableCell>
+                  <TableCell
+                    style={{ padding: "15px 24px 6px 16px" }}
+                    key={index}
+                  >
+                    {row[e.row]}
+                  </TableCell>
                 );
               })}
             </TableRow>

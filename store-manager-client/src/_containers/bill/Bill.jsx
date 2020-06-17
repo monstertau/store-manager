@@ -2,15 +2,25 @@ import React, { useEffect } from "react";
 import MaterialTable from "material-table";
 import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
-import { invoiceService } from "../../_services";
 import CustomAlert from "../../_components/common/CustomAlert";
-import { debounce, IconButton } from "@material-ui/core";
+import { debounce, IconButton, Divider } from "@material-ui/core";
 import TablePagination from "@material-ui/core/TablePagination";
 import { validateService } from "../../_services/validate.service";
 import { billService } from "../../_services/bill.service";
 import Chip from "@material-ui/core/Chip";
 import "./bill.css";
 import tableIcons from "../../_utils/tableIcon";
+import SearchWithDate from "../../_components/common/SearchWithDate";
+import { dateActions } from "../../_actions/date.actions";
+import CustomizedDialogs from "./modal";
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
+import Typography from "@material-ui/core/Typography";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Button from "@material-ui/core/Button";
+
 const column = [
   {
     title: "ID",
@@ -46,10 +56,10 @@ const column = [
   },
   {
     title: "#Items",
-    field: "buy_item",
+    field: "sell_item",
     type: "numeric",
     width: "10%",
-    render: (rowData) => <div>{rowData.buy_items.length}</div>,
+    render: (rowData) => <div>{rowData.sell_items.length}</div>,
   },
 ];
 function ConnectedBill(props) {
@@ -59,14 +69,24 @@ function ConnectedBill(props) {
     pageNumber: 0,
     numberRowPerPage: 5,
     recordsTotal: 0,
+    expanded: false,
+    dialogOpen: false,
+    rowData: [],
   });
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
   const handleChangeSearch = async (e) => {
     new Promise(async (resolve, reject) => {
-      let result = await invoiceService.searchInvoice(
-        0,
-        state.numberRowPerPage,
-        { purpose: e, description: e }
-      );
+      let result = await billService.searchSell(0, state.numberRowPerPage, {
+        purpose: e,
+        description: e,
+      });
       if (result.success === false) {
         props.alertError(result.message);
         reject();
@@ -87,7 +107,7 @@ function ConnectedBill(props) {
   };
   const handleChangePage = async (page) => {
     new Promise(async (resolve, reject) => {
-      let result = await invoiceService.searchInvoice(
+      let result = await billService.searchSell(
         state.numberRowPerPage * page,
         state.numberRowPerPage,
         state.search
@@ -106,14 +126,16 @@ function ConnectedBill(props) {
       }
     });
   };
+  const collapseExpaned = () => {
+    new Promise(async (resolve, reject) => {
+      setState({ ...state, expanded: !state.expanded });
+      resolve();
+    });
+  };
   const handleChangeRowPerPage = async (pageSize) => {
     props.alertClear();
     new Promise(async (resolve, reject) => {
-      let result = await invoiceService.searchInvoice(
-        0,
-        pageSize,
-        state.search
-      );
+      let result = await billService.searchSell(0, pageSize, state.search);
       if (result.success == false) {
         props.alertError(result.message);
         reject();
@@ -129,14 +151,37 @@ function ConnectedBill(props) {
       }
     });
   };
-  useEffect(() => {
-    props.alertClear();
+  const defaultSearch = () => {
     new Promise(async (resolve, reject) => {
-      var result = await billService.searchBuy(
+      var result = await billService.searchSell(
         state.pageNumber,
         state.numberRowPerPage,
-        state.search
+        {}
       );
+      if (result.success == false) {
+        props.alertError(result.message);
+      }
+      setState({
+        ...state,
+        data: result.data,
+        recordsTotal: result.recordsFiltered,
+        open: true,
+        expanded: false,
+      });
+      resolve();
+    });
+  };
+  useEffect(() => {
+    props.alertClear();
+    props.clearDate();
+    defaultSearch();
+  }, []);
+  const searchSellDate = () => {
+    new Promise(async (resolve, reject) => {
+      var result = await billService.searchSell(0, state.numberRowPerPage, {
+        start: props.dateFilter.startDate,
+        end: props.dateFilter.endDate,
+      });
       if (result.success == false) {
         props.alertError(result.message);
       }
@@ -148,7 +193,7 @@ function ConnectedBill(props) {
       });
       resolve();
     });
-  }, []);
+  };
   return (
     <div style={{ padding: "10px 15px" }}>
       {props.alert.message && (
@@ -161,55 +206,62 @@ function ConnectedBill(props) {
         />
       )}
       <div>
+        <CustomizedDialogs
+          open={open}
+          handleClickOpen={handleClickOpen}
+          handleClose={handleClose}
+          rowData={state.rowData}
+        />
+        <ExpansionPanel expanded={state.expanded}>
+          <ExpansionPanelSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1c-content"
+            id="panel1c-header"
+            onClick={(e) => {
+              e.preventDefault();
+              collapseExpaned();
+            }}
+          >
+            <Typography>Advanced Searching</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <SearchWithDate />
+          </ExpansionPanelDetails>
+          <Divider />
+          <ExpansionPanelActions>
+            <Button
+              size="small"
+              onClick={(e) => {
+                new Promise(async (resolve, reject) => {
+                  e.preventDefault();
+                  defaultSearch();
+                  resolve();
+                });
+              }}
+            >
+              Clear
+            </Button>
+            <Button
+              size="small"
+              color="primary"
+              onClick={(e) => {
+                e.preventDefault();
+                searchSellDate();
+              }}
+            >
+              Search
+            </Button>
+          </ExpansionPanelActions>
+        </ExpansionPanel>
+        <Divider />
         <MaterialTable
           title="Bill View"
           columns={column}
           editable={{
-            onRowAdd: (newData) =>
-              new Promise((resolve, reject) => {
-                setTimeout(async () => {
-                  let newSuppilierMsg = await invoiceService.createInvoice(
-                    newData
-                  );
-                  if (newSuppilierMsg.success === true) {
-                    props.alertSuccess("Created sucessful!");
-                    var result = await invoiceService.searchInvoice(
-                      0,
-                      state.numberRowPerPage,
-                      ""
-                    );
-                    setState((prevState) => {
-                      return {
-                        ...prevState,
-                        data: result.data,
-                        recordsTotal: resolve.recordsTotal,
-                        pageNumber: Math.ceil(
-                          state.recordsTotal / state.numberRowPerPage
-                        ),
-                        open: true,
-                      };
-                    });
-                    handleChangePage(
-                      state.recordsTotal % state.numberRowPerPage == 0
-                        ? Math.ceil(state.recordsTotal / state.numberRowPerPage)
-                        : Math.ceil(
-                            state.recordsTotal / state.numberRowPerPage
-                          ) - 1
-                    );
-                    resolve();
-                  } else {
-                    setState({ ...state, open: true });
-                    props.alertError(newSuppilierMsg.message);
-                    reject();
-                  }
-                }, 600);
-              }),
             onRowDelete: (oldData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  let msgRemove = await invoiceService.deleteInvoice(
-                    oldData.id
-                  );
+                  let msgRemove = await billService.deleteSell(oldData.id);
                   if (msgRemove.success === true) {
                     setState((prevState) => {
                       let dataDelete = [...prevState.data];
@@ -237,20 +289,23 @@ function ConnectedBill(props) {
             },
             emptyRowsWhenPaging: true,
             actionsCellStyle: {
-              // display: "flex",
-              // justifyContent: "center",
               paddingLeft: 16,
-              // width: "100%",
             },
           }}
           actions={[
             {
               icon: tableIcons.View,
               tooltip: "Details",
-              onClick: (event, rowData) =>
-                rowData.buy_items.map((value) => {
-                  console.log(value);
-                }),
+              onClick: (event, rowData) => {
+                // console.log(rowData.sell_items);
+                new Promise(async (resolve, reject) => {
+                  console.log(rowData);
+                  setState({ ...state, rowData: rowData });
+                  resolve();
+                  handleClickOpen();
+                });
+              },
+              // rowData.sell_items.map((value) => {}),
             },
           ]}
           icons={tableIcons}
@@ -281,9 +336,10 @@ function ConnectedBill(props) {
   );
 }
 const mapStateToProps = (state) => {
-  const { alert } = state;
+  const { alert, dateFilter } = state;
   return {
     alert,
+    dateFilter,
   };
 };
 const mapDispatchToProps = (dispatch) => {
@@ -291,6 +347,7 @@ const mapDispatchToProps = (dispatch) => {
     alertSuccess: (message) => dispatch(alertActions.success(message)),
     alertError: (message) => dispatch(alertActions.error(message)),
     alertClear: () => dispatch(alertActions.clear()),
+    clearDate: () => dispatch(dateActions.clearDate()),
   };
 };
 const Bill = connect(mapStateToProps, mapDispatchToProps)(ConnectedBill);

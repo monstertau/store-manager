@@ -129,11 +129,11 @@ function ConnectedReport(props) {
           revenue: result.revenue,
           products: result.products,
         });
-        resolve();
       } else {
         props.alertError(result.message);
         reject();
       }
+      resolve();
     });
   }, []);
   return (

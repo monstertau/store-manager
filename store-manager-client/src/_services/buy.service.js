@@ -1,21 +1,13 @@
 import { authHeader, authHeaderWithCT } from "../_utils";
-export const billService = {
-  createNewSell,
-  searchSell,
-  updateSell,
-  deleteSell,
-};
+export const buyService = {};
 
-async function createNewSell(newBuy) {
+async function createNewBuy() {
   const requestOption = {
     method: "POST",
     headers: authHeaderWithCT(),
     body: JSON.stringify(newBuy),
   };
-  return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/sells`,
-    requestOption
-  )
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/api/v1/buys`, requestOption)
     .then((res) => res.json())
     .then((data) => {
       console.log(data);
@@ -23,7 +15,7 @@ async function createNewSell(newBuy) {
     });
 }
 
-async function searchSell(start, length, search) {
+async function searchBuy(start, length, search) {
   const requestOption = {
     method: "POST",
     headers: authHeaderWithCT(),
@@ -35,7 +27,7 @@ async function searchSell(start, length, search) {
     }),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/search/sells`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/search/buys`,
     requestOption
   )
     .then((res) => res.json())
@@ -45,13 +37,13 @@ async function searchSell(start, length, search) {
     });
 }
 
-async function getSellInfo(id) {
+async function getBuyInfo(id) {
   const requestOption = {
     method: "GET",
     headers: authHeader(),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/sells/${id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/buys/${id}`,
     requestOption
   )
     .then((res) => res.json())
@@ -61,14 +53,14 @@ async function getSellInfo(id) {
     });
 }
 
-async function updateSell(sellInfo) {
+async function updateSell(buyInfo) {
   const requestOption = {
     method: "PUT",
     headers: authHeaderWithCT(),
-    body: JSON.stringify(sellInfo),
+    body: JSON.stringify(buyInfo),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/sells/${sellInfo.id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/buys/${buyInfo.id}`,
     requestOption
   )
     .then((res) => res.json())
@@ -78,13 +70,13 @@ async function updateSell(sellInfo) {
     });
 }
 
-async function deleteSell(id) {
+async function deleteBuy(id) {
   const requestOption = {
     method: "DELETE",
     headers: authHeader(),
   };
   return fetch(
-    `${process.env.REACT_APP_SERVER_URL}/api/v1/sells/${id}`,
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/buys/${id}`,
     requestOption
   )
     .then((res) => res.json())
