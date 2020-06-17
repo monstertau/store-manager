@@ -117,6 +117,15 @@ class CashierUI extends React.Component {
         name: "",
         id: "",
       },
+      product: [
+        {
+          name: "Bàn phím dell",
+          productid: 2,
+          unit: "Pack",
+          price: 3000,
+          total: 6000,
+        },
+      ],
     };
   }
   componentDidMount() {
@@ -290,6 +299,53 @@ class CashierUI extends React.Component {
                         <div>
                           <TextField
                             variant="outlined"
+                            style={{ width: "90%", marginBottom: "3vh" }}
+                            size="small"
+                            type="number"
+                          ></TextField>
+                          <div>
+                            <div>Price: 3000</div>
+                            <div style={{ fontWeight: "bold" }}>
+                              Total: 6000
+                            </div>
+                          </div>
+                        </div>
+                      </React.Fragment>
+                    }
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="Delete">
+                      <DeleteOutlineIcon color="secondary" />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </Grid>
+              </Grid>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Grid container>
+                <Grid item xs={8}>
+                  <ListItemText
+                    primary={
+                      <Typography variant="h6">Bàn phím dell</Typography>
+                    }
+                    secondary={
+                      <div>
+                        <div>ProductID: 2</div>
+                        <div>Unit: Pack</div>
+                      </div>
+                    }
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <ListItemText
+                    primary={
+                      <React.Fragment>
+                        <div>
+                          <TextField
+                            variant="outlined"
                             style={{ width: "90%", marginBottom: "1vh" }}
                             size="small"
                             type="number"
@@ -355,101 +411,7 @@ class CashierUI extends React.Component {
                 <Grid item xs={1}>
                   <ListItemSecondaryAction>
                     <IconButton edge="end" aria-label="Delete">
-                    <DeleteOutlineIcon color="secondary" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Grid container>
-                <Grid item xs={8}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h6">Bàn phím dell</Typography>
-                    }
-                    secondary={
-                      <div>
-                        <div>ProductID: 2</div>
-                        <div>Unit: Pack</div>
-                      </div>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <div>
-                          <TextField
-                            variant="outlined"
-                            style={{ width: "90%", marginBottom: "3vh" }}
-                            size="small"
-                            type="number"
-                          ></TextField>
-                          <div>
-                            <div>Price: 3000</div>
-                            <div style={{ fontWeight: "bold" }}>
-                              Total: 6000
-                            </div>
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="Delete">
-                    <DeleteOutlineIcon color="secondary" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Grid container>
-                <Grid item xs={8}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h6">Bàn phím dell</Typography>
-                    }
-                    secondary={
-                      <div>
-                        <div>ProductID: 2</div>
-                        <div>Unit: Pack</div>
-                      </div>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <div>
-                          <TextField
-                            variant="outlined"
-                            style={{ width: "90%", marginBottom: "3vh" }}
-                            size="small"
-                            type="number"
-                          ></TextField>
-                          <div>
-                            <div>Price: 3000</div>
-                            <div style={{ fontWeight: "bold" }}>
-                              Total: 6000
-                            </div>
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="Delete">
-                    <DeleteOutlineIcon color="secondary" />
+                      <DeleteOutlineIcon color="secondary" />
                     </IconButton>
                   </ListItemSecondaryAction>
                 </Grid>
