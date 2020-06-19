@@ -2,27 +2,37 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import { fade, withStyles } from "@material-ui/core/styles";
+import { connect } from "react-redux";
 import {
   Typography,
   Button,
   List,
   ListItem,
   ListItemText,
+  ListItemIcon,
   ListItemSecondaryAction,
   Divider,
 } from "@material-ui/core";
+import RemoveShoppingCartIcon from "@material-ui/icons/RemoveShoppingCart";
 import TextField from "@material-ui/core/TextField";
-import MaterialTable from "material-table";
-import SearchIcon from "@material-ui/icons/Search";
-import InputBase from "@material-ui/core/InputBase";
-import { userService } from "../../_services";
-import Inventory from "../inventory/Inventory";
+import { userService, customerService } from "../../_services";
+import ProductTable from "./ProductTable";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import { numberWithCommas } from "../../_utils";
+import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import TransactionDate from "./TransactionDate";
 const useStyles = (theme) => ({
   paper: {
+    // height:"95%",
     margin: theme.spacing(2),
     padding: theme.spacing(2),
+  },
+  productStyle: {
+    height: "95%",
+    margin: theme.spacing(2),
+    // padding: theme.spacing(2),
   },
   leftForm: {
     margin: theme.spacing(2),
@@ -94,14 +104,18 @@ const useStyles = (theme) => ({
   titleStyle: {
     fontWeight: "bold",
   },
+  hoveringStyle: {
+    "&:hover": {
+      backgroundColor: fade(theme.palette.action.disabled, 0.05),
+    },
+  },
 });
-class CashierUI extends React.Component {
+class connectedCashierUI extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      date: new Date().toLocaleString(),
       customer: {
-        name: "New Customer",
+        name: "",
         id: "",
         email: "",
       },
@@ -117,17 +131,15 @@ class CashierUI extends React.Component {
         name: "",
         id: "",
       },
-      product: [
-        {
-          name: "Bàn phím dell",
-          productid: 2,
-          unit: "Pack",
-          price: 3000,
-          total: 6000,
-        },
-      ],
+      productCart: [],
+      allCustomer: [{ id: 0, name: "null" }],
     };
+    this.top100Films = [
+      { title: "The Shawshank Redemption", year: 1994 },
+      { title: "The Godfather", year: 1972 },
+    ];
   }
+
   componentDidMount() {
     userService.getUserInfo().then((data) => {
       if (data.success === true) {
@@ -140,7 +152,85 @@ class CashierUI extends React.Component {
         console.log(data);
       }
     });
+    customerService.getAll().then((data) => {
+      if (data.success === true) {
+        this.setState({
+          allCustomer: data.customers,
+        });
+        // console.log(data.customers);
+      }
+    });
   }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.product !== nextProps.product) {
+      const product = nextProps.product;
+      const productCartCopy = this.state.productCart.slice();
+      const targetIndex = this.state.productCart.findIndex(
+        (f) => f.id === product.id
+      );
+      if (targetIndex !== -1) {
+        productCartCopy[targetIndex].quantities += product.quantities;
+      } else {
+        productCartCopy.push(product);
+        this.setState({
+          productCart: productCartCopy,
+        });
+      }
+    }
+  }
+
+  quantitiesChange = (index) => (event) => {
+    const value = event.target.value;
+    if (value) {
+      const newproductCart = this.state.productCart.slice();
+      newproductCart[index].quantities = parseInt(event.target.value);
+      this.setState({
+        productCart: newproductCart,
+      });
+    }
+
+    console.log(event.target.value);
+  };
+  handleDeleteProduct = (index) => {
+    const productCartCopy = this.state.productCart.slice();
+    productCartCopy.splice(index, 1);
+    this.setState({
+      productCart: productCartCopy,
+    });
+    console.log(index);
+  };
+  handleDiscard = () => {
+    this.setState({
+      productCart: [],
+      customer: {
+        name: "",
+        id: "",
+        email: "",
+      },
+    });
+  };
+  handleProceed = () => {
+    console.log(this.state)
+  };
+  handleChooseCustomer = (event, value) => {
+    if (value === null) {
+      this.setState({
+        customer: {
+          name: "",
+          id: "",
+          email: "",
+        },
+      });
+    } else {
+      this.setState({
+        customer: {
+          name: value.name,
+          id: value.id,
+          email: value.email,
+        },
+      });
+    }
+  };
   render() {
     const { classes } = this.props;
 
@@ -163,7 +253,7 @@ class CashierUI extends React.Component {
             <div className={classes.titleStyle}>Transaction Date</div>
           </Grid>
           <Grid item xs={12} sm={8}>
-            {this.state.date}
+            <TransactionDate />
           </Grid>
         </React.Fragment>
       );
@@ -178,7 +268,12 @@ class CashierUI extends React.Component {
           </Grid>
           <Grid item xs={12} sm={4} style={{ textAlign: "right" }}>
             <Typography variant="subtitle1">
-              {this.state.price.subTotal}
+              {numberWithCommas(
+                this.state.productCart.reduce(
+                  (subTotal, item) => subTotal + item.price * item.quantities,
+                  0
+                )
+              )}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={8}>
@@ -188,7 +283,7 @@ class CashierUI extends React.Component {
           </Grid>
           <Grid item xs={12} sm={4} style={{ textAlign: "right" }}>
             <Typography variant="subtitle1">
-              {this.state.price.discount}
+              {this.state.price.discount} %
             </Typography>
           </Grid>
           <Grid item xs={12} sm={8}>
@@ -206,7 +301,12 @@ class CashierUI extends React.Component {
               variant="h5"
               style={{ fontWeight: "bold", marginTop: "3vh" }}
             >
-              Total ({12})
+              Total (
+              {this.state.productCart.reduce(
+                (subTotal, item) => subTotal + item.quantities,
+                0
+              )}
+              )
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4} style={{ textAlign: "right" }}>
@@ -214,7 +314,15 @@ class CashierUI extends React.Component {
               variant="h5"
               style={{ fontWeight: "bold", marginTop: "3vh" }}
             >
-              {this.state.price.grandTotal}
+              {numberWithCommas(
+                parseInt(
+                  this.state.productCart.reduce(
+                    (subTotal, item) => subTotal + item.price * item.quantities,
+                    0
+                  ) *
+                    (1 + this.state.price.tax / 100)
+                )
+              )}
             </Typography>
           </Grid>
         </React.Fragment>
@@ -224,31 +332,47 @@ class CashierUI extends React.Component {
       return (
         <React.Fragment>
           <Grid item xs={12} sm={8}>
-            <div className={classes.search}>
-              <div className={classes.searchIcon}>
-                <SearchIcon />
-              </div>
-              <InputBase
-                placeholder="Search Customer…"
-                classes={{
-                  root: classes.inputRoot,
-                  input: classes.inputInput,
-                }}
-                inputProps={{ "aria-label": "search" }}
-              />
-            </div>
+            <Autocomplete
+              id="combo-box-demo"
+              options={this.state.allCustomer}
+              onChange={this.handleChooseCustomer}
+              getOptionLabel={(option) => option.name}
+              renderOption={(option) => (
+                <React.Fragment>
+                  {option.name} - ID: {option.id}
+                </React.Fragment>
+              )}
+              // style={{ width: 300 }}
+              size="small"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search Customer..."
+                  variant="outlined"
+                />
+              )}
+            />
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={2}>
             <Button variant="contained" color="secondary">
               New
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <Button variant="contained" color="primary">
+              Add
             </Button>
           </Grid>
           <Grid item xs={12} sm={6}>
             <div className={classes.titleStyle}> Customer Name</div>
           </Grid>
           <Grid item xs={12} sm={6}>
-            {this.state.customer.name}
+            {this.state.customer.name.length > 1 ? (
+              <>{this.state.customer.name}</>
+            ) : (
+              "New Customer"
+            )}
           </Grid>
 
           <Grid item xs={12} sm={6}>
@@ -257,170 +381,140 @@ class CashierUI extends React.Component {
           <Grid item xs={12} sm={6}>
             {this.state.customer.id}
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={6} className={classes.titleStyle}>
             Customer Pay
           </Grid>
-          <Grid item xs={12} sm={8}>
-            <TextField type="number" defaultValue="0" size="small" />
+          <Grid item xs={12} sm={6}>
+            <TextField
+              type="number"
+              defaultValue="0"
+              size="small"
+              InputProps={{
+                inputProps: {
+                  min: 0,
+                },
+              }}
+            />
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={6} className={classes.titleStyle}>
             Change
           </Grid>
-          <Grid item xs={12} sm={8}>
+          <Grid item xs={12} sm={6}>
             {this.state.price.change}
           </Grid>
         </React.Fragment>
       );
     };
+
     const ProductAdder = () => {
-      return (
-        <React.Fragment>
-          <List className={classes.listStyle}>
-            <ListItem>
-              <Grid container>
-                <Grid item xs={8}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h6">Bàn phím dell</Typography>
-                    }
-                    secondary={
-                      <div>
-                        <div>ProductID: 2</div>
-                        <div>Unit: Pack</div>
-                      </div>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <div>
-                          <TextField
-                            variant="outlined"
-                            style={{ width: "90%", marginBottom: "3vh" }}
-                            size="small"
-                            type="number"
-                          ></TextField>
-                          <div>
-                            <div>Price: 3000</div>
-                            <div style={{ fontWeight: "bold" }}>
-                              Total: 6000
-                            </div>
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="Delete">
-                      <DeleteOutlineIcon color="secondary" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Grid container>
-                <Grid item xs={8}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h6">Bàn phím dell</Typography>
-                    }
-                    secondary={
-                      <div>
-                        <div>ProductID: 2</div>
-                        <div>Unit: Pack</div>
-                      </div>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <div>
-                          <TextField
-                            variant="outlined"
-                            style={{ width: "90%", marginBottom: "1vh" }}
-                            size="small"
-                            type="number"
-                          ></TextField>
-                          <div>
-                            <div>Price: 3000</div>
-                            <div style={{ fontWeight: "bold" }}>
-                              Total: 6000
-                            </div>
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="Delete">
-                      <DeleteOutlineIcon color="secondary" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Grid container>
-                <Grid item xs={8}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h6">Bàn phím dell</Typography>
-                    }
-                    secondary={
-                      <div>
-                        <div>ProductID: 2</div>
-                        <div>Unit: Pack</div>
-                      </div>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <div>
-                          <TextField
-                            variant="outlined"
-                            style={{ width: "90%", marginBottom: "3vh" }}
-                            size="small"
-                            type="number"
-                          ></TextField>
-                          <div>
-                            <div>Price: 3000</div>
-                            <div style={{ fontWeight: "bold" }}>
-                              Total: 6000
-                            </div>
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="Delete">
-                      <DeleteOutlineIcon color="secondary" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <Divider />
-          </List>
-        </React.Fragment>
-      );
+      if (this.state.productCart.length < 1) {
+        return (
+          <Grid container style={{ marginTop: "10vh" }}>
+            <Grid item xs={12} style={{ textAlign: "center" }}>
+              <RemoveShoppingCartIcon style={{ color: "#3F413C" }} />
+            </Grid>
+            <Grid item xs={12} style={{ textAlign: "center" }}>
+              <Typography variant="subtitle1" style={{ color: "#1E1F1A" }}>
+                Empty Cart
+              </Typography>
+            </Grid>
+          </Grid>
+        );
+      } else {
+        return (
+          <React.Fragment>
+            <List className={classes.listStyle}>
+              {this.state.productCart.map((item, index) => {
+                return (
+                  <>
+                    <ListItem divider className={classes.hoveringStyle}>
+                      <Grid container>
+                        <Grid item xs={8}>
+                          <ListItemText
+                            primary={
+                              <Typography
+                                variant="h6"
+                                style={{ fontWeight: "bold" }}
+                              >
+                                {item.name}
+                              </Typography>
+                            }
+                            secondary={
+                              <div>
+                                <div>ProductID: {item.id}</div>
+                                <div>Unit: {item.unit}</div>
+                              </div>
+                            }
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <ListItemText
+                            primary={
+                              <React.Fragment>
+                                <div>
+                                  <TextField
+                                    key={index}
+                                    name={"product" + index}
+                                    id={"product" + index}
+                                    variant="outlined"
+                                    style={{
+                                      width: "90%",
+                                      marginBottom: "1vh",
+                                      marginTop: "1vh",
+                                    }}
+                                    size="small"
+                                    type="number"
+                                    onChange={this.quantitiesChange(index)}
+                                    InputProps={{
+                                      inputProps: {
+                                        min: 1,
+                                      },
+                                    }}
+                                    defaultValue={item.quantities}
+                                  />
+                                  <div>
+                                    <div style={{ fontSize: "16px" }}>
+                                      Price: {numberWithCommas(item.price)}
+                                    </div>
+                                    <div
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "17px",
+                                      }}
+                                    >
+                                      Total:{" "}
+                                      {numberWithCommas(
+                                        item.price * item.quantities
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </React.Fragment>
+                            }
+                          />
+                        </Grid>
+                        <Grid item xs={1}>
+                          <ListItemSecondaryAction>
+                            <IconButton
+                              edge="end"
+                              aria-label="Delete"
+                              key="buttonDelete"
+                              onClick={() => this.handleDeleteProduct(index)}
+                            >
+                              <DeleteOutlineIcon color="secondary" />
+                            </IconButton>
+                          </ListItemSecondaryAction>
+                        </Grid>
+                      </Grid>
+                    </ListItem>
+                  </>
+                );
+              })}
+            </List>
+          </React.Fragment>
+        );
+      }
     };
     const ButtonAction = () => {
       return (
@@ -430,6 +524,7 @@ class CashierUI extends React.Component {
               variant="contained"
               color="secondary"
               className={classes.DiscardStyle}
+              onClick={() => this.handleDiscard()}
             >
               DISCARD
             </Button>
@@ -440,6 +535,7 @@ class CashierUI extends React.Component {
               variant="contained"
               color="primary"
               className={classes.ProceedStyle}
+              onClick={() => this.handleProceed()}
             >
               PROCEED
             </Button>
@@ -452,15 +548,29 @@ class CashierUI extends React.Component {
         <Grid container>
           {/* <Grid item xs={12} container> */}
           <Grid item xs={4}>
-            <Paper
-              className={classes.paper}
-              style={{ maxHeight: 500, overflow: "auto" }}
-            >
-              <ProductAdder />
+            <Paper className={classes.productStyle}>
+              <div style={{ backgroundColor: "#737373", height: "3.5em" }}>
+                <ListItem>
+                  <ListItemIcon>
+                    <ShoppingCartIcon style={{ color: "#F2F2F2" }} />
+                  </ListItemIcon>
+                  <ListItemText>
+                    <Typography
+                      variant="subtitle1"
+                      style={{ color: "#F2F2F2" }}
+                    >
+                      Customer's Cart
+                    </Typography>
+                  </ListItemText>
+                </ListItem>
+              </div>
+              <div style={{ maxHeight: 400, overflow: "auto" }}>
+                <ProductAdder />
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={8}>
-            <Inventory />
+            <ProductTable />
           </Grid>
           <Grid item xs={4}>
             <Paper className={classes.belowPaperStyle}>
@@ -495,5 +605,17 @@ class CashierUI extends React.Component {
     );
   }
 }
-const CashierUIStyles = withStyles(useStyles)(CashierUI);
-export default CashierUIStyles;
+const mapStateToProps = (state) => {
+  const { alert } = state;
+  const { product } = state.productAdder;
+  return {
+    alert,
+    product,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {};
+};
+const CashierUIStyles = withStyles(useStyles)(connectedCashierUI);
+const CashierUI = connect(mapStateToProps, mapDispatchToProps)(CashierUIStyles);
+export default CashierUI;

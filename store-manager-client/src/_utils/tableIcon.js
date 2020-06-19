@@ -16,7 +16,7 @@ import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
 import VisibilityIcon from "@material-ui/icons/Visibility";
-
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 const tableIcons = {
   View: forwardRef((props, ref) => (
     <VisibilityIcon {...props} ref={ref} style={{ color: "rgba(0, 0, 0, 0.54)" }} />
@@ -33,6 +33,7 @@ const tableIcons = {
   Edit: forwardRef((props, ref) => (
     <Edit {...props} ref={ref} color="primary" />
   )),
+
   Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
   Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
   FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
@@ -48,6 +49,9 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
   VpnKeyIcon: forwardRef((props, ref) => (
     <VpnKeyIcon {...props} ref={ref} style={{ color: "4287f5" }} />
+  )),
+  AddProduct: forwardRef((props, ref) => (
+    <AddCircleIcon {...props} ref={ref} style={{color:"#3F730A"}} />
   )),
 };
 
