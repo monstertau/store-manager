@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -11,6 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import PropTypes from "prop-types";
 import Orders from "../report/Orders";
 import { Divider, Grid, Chip } from "@material-ui/core";
+import { timePickerDefaultProps } from "@material-ui/pickers/constants/prop-types";
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -41,7 +42,6 @@ const DialogTitle = withStyles(styles)((props) => {
     </MuiDialogTitle>
   );
 });
-
 const DialogContent = withStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
@@ -56,6 +56,21 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function CustomizedDialogs(props) {
+  const [state, setState] = React.useState({
+    totalCompute: 0,
+  });
+  useEffect(() => {
+    if (props.rowData && !props.rowObj.total) {
+      var totalcheck = 0;
+      new Promise(async (resolve, reject) => {
+        props.rowData.map((e) => {
+          totalcheck += e.price * e.quantities;
+        });
+        resolve();
+        setState({ ...state, totalCompute: totalcheck });
+      });
+    }
+  }, [props.rowData]);
   return (
     <div>
       <Dialog
@@ -66,8 +81,8 @@ export default function CustomizedDialogs(props) {
         open={props.open}
       >
         <DialogTitle id="customized-dialog-title" onClose={props.handleClose}>
-          View Details Bill
-          {props.rowData.active ? (
+          {props.title}
+          {props.rowObj.active ? (
             <Chip
               style={{ marginLeft: "1rem" }}
               label="Completed"
@@ -85,15 +100,15 @@ export default function CustomizedDialogs(props) {
           <Grid container spacing={3} style={{ padding: "0 0px 20px 12px" }}>
             <Grid item xs={4}>
               <Typography>
-                <b> Cashier: </b> {props.rowData.user_name}
+                <b> Cashier: </b> {props.rowObj.user_name}
               </Typography>
               {/* <Paper className={classes.paper}>xs=12</Paper> */}
             </Grid>
             <Grid item xs={4}>
               <Typography>
                 <b> Customer: </b>
-                {props.rowData.customer_name ? (
-                  props.rowData.customer_name
+                {props.rowObj.customer_name ? (
+                  props.rowObj.customer_name
                 ) : (
                   <span>New Customer</span>
                 )}
@@ -101,20 +116,11 @@ export default function CustomizedDialogs(props) {
             </Grid>
             <Grid item xs={4}>
               <Typography>
-                <b> Create At: </b> {props.rowData.createdAt}
+                <b> Create At: </b> {props.rowObj.createdAt}
               </Typography>
             </Grid>
           </Grid>
-          <Orders
-            data={[
-              { column: "ID", row: "product_id", type: "text" },
-              { column: "Name", row: "product_name", type: "text" },
-              { column: "Unit", row: "unit", type: "text" },
-              { column: "Price", row: "price", type: "dotNumber" },
-              { column: "Quantities", row: "quantities", type: "text" },
-            ]}
-            products={props.rowData.sell_items}
-          />
+          <Orders data={props.columns} products={props.rowData} />
           <Grid container spacing={3} style={{ padding: "10px 0px 0px 20px" }}>
             <Grid item xs={5}></Grid>
             <Grid item xs={7}>
@@ -124,19 +130,28 @@ export default function CustomizedDialogs(props) {
                 style={{ padding: "10px 0px 0px 20px" }}
               >
                 <Grid item xs={4}>
-                  <Typography>
-                    <b> Total:</b>{" "}
-                    {Math.ceil(props.rowData.total / (1 + props.rowData.tax))}
-                  </Typography>
+                  {props.rowObj.total ? (
+                    <Typography>
+                      <b> Total:</b>
+                      {Math.ceil(props.rowObj.total / (1 + props.rowObj.tax))}
+                    </Typography>
+                  ) : (
+                    <></>
+                  )}
                 </Grid>
                 <Grid item xs={3}>
-                  <Typography>
-                    <b> Tax:</b> {props.rowData.tax * 100}%
-                  </Typography>
+                  {props.rowObj.tax ? (
+                    <Typography>
+                      <b> Tax:</b> {props.rowObj.tax * 100}%
+                    </Typography>
+                  ) : (
+                    <></>
+                  )}
                 </Grid>
                 <Grid item xs={5}>
                   <Typography>
-                    <b>Grand Total</b>: {props.rowData.total}
+                    <b>Grand Total</b>: {props.rowObj.total}
+                    {state.totalCompute}
                   </Typography>
                 </Grid>
               </Grid>
@@ -157,5 +172,6 @@ CustomizedDialogs.prototype = {
   open: PropTypes.bool,
   handleClickOpen: PropTypes.func,
   handleClose: PropTypes.func,
-  rowData: PropTypes.object,
+  rowObj: PropTypes.object,
+  rowData: PropTypes.array,
 };

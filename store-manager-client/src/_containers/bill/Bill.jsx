@@ -8,6 +8,7 @@ import TablePagination from "@material-ui/core/TablePagination";
 import { validateService } from "../../_services/validate.service";
 import { billService } from "../../_services/bill.service";
 import Chip from "@material-ui/core/Chip";
+import { useLocation } from "react-router-dom";
 import "./bill.css";
 import tableIcons from "../../_utils/tableIcon";
 import SearchWithDate from "../../_components/common/SearchWithDate";
@@ -20,7 +21,13 @@ import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
-
+const columnOrder = [
+  { column: "ID", row: "product_id", type: "text" },
+  { column: "Name", row: "product_name", type: "text" },
+  { column: "Unit", row: "unit", type: "text" },
+  { column: "Price", row: "price", type: "dotNumber" },
+  { column: "Quantities", row: "quantities", type: "text" },
+];
 const column = [
   {
     title: "ID",
@@ -63,6 +70,7 @@ const column = [
   },
 ];
 function ConnectedBill(props) {
+  const location = useLocation();
   const [state, setState] = React.useState({
     data: [],
     search: {},
@@ -210,49 +218,57 @@ function ConnectedBill(props) {
           open={open}
           handleClickOpen={handleClickOpen}
           handleClose={handleClose}
-          rowData={state.rowData}
+          rowData={state.rowData.sell_items}
+          rowObj={state.rowData}
+          title={"Details Bill"}
+          columns={columnOrder}
         />
-        <ExpansionPanel expanded={state.expanded}>
-          <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1c-content"
-            id="panel1c-header"
-            onClick={(e) => {
-              e.preventDefault();
-              collapseExpaned();
-            }}
-          >
-            <Typography>Advanced Searching</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <SearchWithDate />
-          </ExpansionPanelDetails>
-          <Divider />
-          <ExpansionPanelActions>
-            <Button
-              size="small"
-              onClick={(e) => {
-                new Promise(async (resolve, reject) => {
-                  e.preventDefault();
-                  defaultSearch();
-                  resolve();
-                });
-              }}
-            >
-              Clear
-            </Button>
-            <Button
-              size="small"
-              color="primary"
+        {location.pathname == "/bill" ? (
+          <ExpansionPanel expanded={state.expanded}>
+            <ExpansionPanelSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1c-content"
+              id="panel1c-header"
               onClick={(e) => {
                 e.preventDefault();
-                searchSellDate();
+                collapseExpaned();
               }}
             >
-              Search
-            </Button>
-          </ExpansionPanelActions>
-        </ExpansionPanel>
+              <Typography>Advanced Searching</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <SearchWithDate />
+            </ExpansionPanelDetails>
+            <Divider />
+            <ExpansionPanelActions>
+              <Button
+                size="small"
+                onClick={(e) => {
+                  new Promise(async (resolve, reject) => {
+                    e.preventDefault();
+                    defaultSearch();
+                    resolve();
+                  });
+                }}
+              >
+                Clear
+              </Button>
+              <Button
+                size="small"
+                color="primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  searchSellDate();
+                }}
+              >
+                Search
+              </Button>
+            </ExpansionPanelActions>
+          </ExpansionPanel>
+        ) : (
+          <></>
+        )}
+
         <Divider />
         <MaterialTable
           title="Bill View"

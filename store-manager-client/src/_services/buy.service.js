@@ -1,7 +1,13 @@
 import { authHeader, authHeaderWithCT } from "../_utils";
-export const buyService = {};
+export const buyService = {
+  createNewBuy,
+  searchBuy,
+  getBuyInfo,
+  updateBuy,
+  deleteBuy,
+};
 
-async function createNewBuy() {
+async function createNewBuy(newBuy) {
   const requestOption = {
     method: "POST",
     headers: authHeaderWithCT(),
@@ -53,7 +59,7 @@ async function getBuyInfo(id) {
     });
 }
 
-async function updateSell(buyInfo) {
+async function updateBuy(buyInfo) {
   const requestOption = {
     method: "PUT",
     headers: authHeaderWithCT(),
