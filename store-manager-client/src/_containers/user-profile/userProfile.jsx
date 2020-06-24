@@ -22,7 +22,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import PasswordField from "../../_components/common/PasswordField";
 import { userService } from "../../_services";
 import CustomAlert from "../../_components/common/CustomAlert";
-import { AddCustomer } from "../cashier/addCustomer";
+import { AddEmployee } from "../employee/addEmployee";
 import SearchWithDate from "../../_components/common/SearchWithDate";
 const useStyles = (theme) => ({
   layout: {
@@ -273,51 +273,48 @@ class userProfile extends React.Component {
                 <Skeleton animation="wave" height={50} />
               )}
             </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                className={classes.buttonStyle}
-                onClick={this.handleSubmit}
-                // startIcon={}
-              >
-                {loadedProfile ? (
-                  <>
+            {loadedProfile ? (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    className={classes.buttonStyle}
+                    onClick={this.handleSubmit}
+                    // startIcon={}
+                  >
                     <UpdateIcon /> Update Profile
-                  </>
-                ) : (
-                  <CircularProgress color="secondary" />
-                )}
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Button
-                variant="contained"
-                color="secondary"
-                className={classes.buttonStyle}
-                onClick={this.handleClickOpenDialog}
-              >
-                {loadedProfile ? (
-                  <>
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    className={classes.buttonStyle}
+                    onClick={this.handleClickOpenDialog}
+                  >
                     <VpnKeyIcon /> Change password
-                  </>
-                ) : (
-                  <CircularProgress color="primary" />
-                )}
-              </Button>
-            </Grid>
+                  </Button>
+                  <AddEmployee
+                    open={this.state.openDialog}
+                    onClose={this.handleCloseDialog}
+                    maxWidth="md"
+                    onSubmit={this.handleCloseDialog}
+                  />
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={12}>
+              <CircularProgress color="secondary" />
+              </Grid>
+            )}
             <Grid item xs={12}>
-              <SearchWithDate/>
+              <SearchWithDate />
             </Grid>
           </Grid>
         </Paper>
-        <AddCustomer
-          open={this.state.openDialog}
-          onClose={this.handleCloseDialog}
-          maxWidth="sm"
-        />
+
         {/* <Dialog
           open={this.state.openDialog}
           onClose={this.handleCloseDialog}
