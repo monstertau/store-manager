@@ -103,6 +103,7 @@ class userProfile extends React.Component {
     this.props.alertClear();
   };
   handleChange = (name) => ({ target: { value } }) => {
+    // console.log(this.state.userInfo)
     if (name === "salary") {
       value = parseInt(value);
     }
@@ -176,9 +177,9 @@ class userProfile extends React.Component {
               {loadedProfile ? (
                 <TextField
                   required
-                  id="fullName"
-                  name="fullName"
-                  label="Full Name"
+                  // id="fullName"
+                  // name="fullName"
+                  // label="Full Name"
                   fullWidth
                   variant="outlined"
                   defaultValue={

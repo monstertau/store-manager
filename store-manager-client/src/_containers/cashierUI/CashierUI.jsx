@@ -11,7 +11,6 @@ import {
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  Divider,
 } from "@material-ui/core";
 import RemoveShoppingCartIcon from "@material-ui/icons/RemoveShoppingCart";
 import TextField from "@material-ui/core/TextField";
@@ -23,6 +22,8 @@ import { numberWithCommas } from "../../_utils";
 import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TransactionDate from "./TransactionDate";
+import { billService } from "../../_services/bill.service";
+import { AddCustomer } from "../cashier/addCustomer";
 const useStyles = (theme) => ({
   paper: {
     // height:"95%",
@@ -110,6 +111,7 @@ const useStyles = (theme) => ({
     },
   },
 });
+
 class connectedCashierUI extends React.Component {
   constructor(props) {
     super(props);
@@ -133,11 +135,8 @@ class connectedCashierUI extends React.Component {
       },
       productCart: [],
       allCustomer: [{ id: 0, name: "null" }],
+      showDialog: false,
     };
-    this.top100Films = [
-      { title: "The Shawshank Redemption", year: 1994 },
-      { title: "The Godfather", year: 1972 },
-    ];
   }
 
   componentDidMount() {
@@ -177,6 +176,12 @@ class connectedCashierUI extends React.Component {
         });
       }
     }
+    if (this.props.customerInfo !== nextProps.customerInfo) {
+      this.setState({
+        showDialog: false,
+      });
+    }
+    console.log(this.state);
   }
 
   quantitiesChange = (index) => (event) => {
@@ -210,7 +215,36 @@ class connectedCashierUI extends React.Component {
     });
   };
   handleProceed = () => {
-    console.log(this.state)
+    if (this.state.productCart.length >= 1) {
+      const newSell = {};
+      newSell.user_id = this.state.cashier.id;
+      newSell.tax = this.state.price.tax / 100;
+      // newSell.billService.createNewSell();
+      if (this.state.customer.id > 0) {
+        newSell.customer_id = this.state.customer.id;
+      }
+      newSell.total = parseInt(
+        this.state.productCart.reduce(
+          (subTotal, item) => subTotal + item.price * item.quantities,
+          0
+        ) *
+          (1 + this.state.price.tax / 100)
+      );
+      newSell.sell_items = [];
+      this.state.productCart.forEach((item) => {
+        const sell_item = {};
+        sell_item.product_id = item.id;
+        sell_item.price = item.price;
+        sell_item.quantities = item.quantities;
+        newSell.sell_items.push(sell_item);
+      });
+
+      billService.createNewSell(newSell).then((data) => {
+        if (data.success === true) {
+          this.handleDiscard();
+        }
+      });
+    }
   };
   handleChooseCustomer = (event, value) => {
     if (value === null) {
@@ -230,6 +264,25 @@ class connectedCashierUI extends React.Component {
         },
       });
     }
+  };
+  handleChange = (name) => ({ target: { value } }) => {
+    console.log(this.state.price.customerPay);
+    this.setState({
+      price: {
+        ...this.state.price,
+        [name]: value,
+      },
+    });
+  };
+  handleAddCustomer = () => {
+    this.setState({
+      showDialog: true,
+    });
+  };
+  handleClose = () => {
+    this.setState({
+      showDialog: false,
+    });
   };
   render() {
     const { classes } = this.props;
@@ -328,194 +381,6 @@ class connectedCashierUI extends React.Component {
         </React.Fragment>
       );
     };
-    const CustomerInfo = () => {
-      return (
-        <React.Fragment>
-          <Grid item xs={12} sm={8}>
-            <Autocomplete
-              id="combo-box-demo"
-              options={this.state.allCustomer}
-              onChange={this.handleChooseCustomer}
-              getOptionLabel={(option) => option.name}
-              renderOption={(option) => (
-                <React.Fragment>
-                  {option.name} - ID: {option.id}
-                </React.Fragment>
-              )}
-              // style={{ width: 300 }}
-              size="small"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search Customer..."
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={2}>
-            <Button variant="contained" color="secondary">
-              New
-            </Button>
-          </Grid>
-          <Grid item xs={12} sm={2}>
-            <Button variant="contained" color="primary">
-              Add
-            </Button>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <div className={classes.titleStyle}> Customer Name</div>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            {this.state.customer.name.length > 1 ? (
-              <>{this.state.customer.name}</>
-            ) : (
-              "New Customer"
-            )}
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <div className={classes.titleStyle}>Customer ID</div>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            {this.state.customer.id}
-          </Grid>
-          <Grid item xs={12} sm={6} className={classes.titleStyle}>
-            Customer Pay
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              type="number"
-              defaultValue="0"
-              size="small"
-              InputProps={{
-                inputProps: {
-                  min: 0,
-                },
-              }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6} className={classes.titleStyle}>
-            Change
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            {this.state.price.change}
-          </Grid>
-        </React.Fragment>
-      );
-    };
-
-    const ProductAdder = () => {
-      if (this.state.productCart.length < 1) {
-        return (
-          <Grid container style={{ marginTop: "10vh" }}>
-            <Grid item xs={12} style={{ textAlign: "center" }}>
-              <RemoveShoppingCartIcon style={{ color: "#3F413C" }} />
-            </Grid>
-            <Grid item xs={12} style={{ textAlign: "center" }}>
-              <Typography variant="subtitle1" style={{ color: "#1E1F1A" }}>
-                Empty Cart
-              </Typography>
-            </Grid>
-          </Grid>
-        );
-      } else {
-        return (
-          <React.Fragment>
-            <List className={classes.listStyle}>
-              {this.state.productCart.map((item, index) => {
-                return (
-                  <>
-                    <ListItem divider className={classes.hoveringStyle}>
-                      <Grid container>
-                        <Grid item xs={8}>
-                          <ListItemText
-                            primary={
-                              <Typography
-                                variant="h6"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                {item.name}
-                              </Typography>
-                            }
-                            secondary={
-                              <div>
-                                <div>ProductID: {item.id}</div>
-                                <div>Unit: {item.unit}</div>
-                              </div>
-                            }
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <ListItemText
-                            primary={
-                              <React.Fragment>
-                                <div>
-                                  <TextField
-                                    key={index}
-                                    name={"product" + index}
-                                    id={"product" + index}
-                                    variant="outlined"
-                                    style={{
-                                      width: "90%",
-                                      marginBottom: "1vh",
-                                      marginTop: "1vh",
-                                    }}
-                                    size="small"
-                                    type="number"
-                                    onChange={this.quantitiesChange(index)}
-                                    InputProps={{
-                                      inputProps: {
-                                        min: 1,
-                                      },
-                                    }}
-                                    defaultValue={item.quantities}
-                                  />
-                                  <div>
-                                    <div style={{ fontSize: "16px" }}>
-                                      Price: {numberWithCommas(item.price)}
-                                    </div>
-                                    <div
-                                      style={{
-                                        fontWeight: "bold",
-                                        fontSize: "17px",
-                                      }}
-                                    >
-                                      Total:{" "}
-                                      {numberWithCommas(
-                                        item.price * item.quantities
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </React.Fragment>
-                            }
-                          />
-                        </Grid>
-                        <Grid item xs={1}>
-                          <ListItemSecondaryAction>
-                            <IconButton
-                              edge="end"
-                              aria-label="Delete"
-                              key="buttonDelete"
-                              onClick={() => this.handleDeleteProduct(index)}
-                            >
-                              <DeleteOutlineIcon color="secondary" />
-                            </IconButton>
-                          </ListItemSecondaryAction>
-                        </Grid>
-                      </Grid>
-                    </ListItem>
-                  </>
-                );
-              })}
-            </List>
-          </React.Fragment>
-        );
-      }
-    };
     const ButtonAction = () => {
       return (
         <React.Fragment>
@@ -550,7 +415,7 @@ class connectedCashierUI extends React.Component {
           <Grid item xs={4}>
             <Paper className={classes.productStyle}>
               <div style={{ backgroundColor: "#737373", height: "3.5em" }}>
-                <ListItem>
+                <ListItem key="shopping-cart">
                   <ListItemIcon>
                     <ShoppingCartIcon style={{ color: "#F2F2F2" }} />
                   </ListItemIcon>
@@ -565,7 +430,122 @@ class connectedCashierUI extends React.Component {
                 </ListItem>
               </div>
               <div style={{ maxHeight: 400, overflow: "auto" }}>
-                <ProductAdder />
+                {/* <ProductAdder /> */}
+                {this.state.productCart.length < 1 ? (
+                  <Grid container style={{ marginTop: "10vh" }}>
+                    <Grid item xs={12} style={{ textAlign: "center" }}>
+                      <RemoveShoppingCartIcon style={{ color: "#3F413C" }} />
+                    </Grid>
+                    <Grid item xs={12} style={{ textAlign: "center" }}>
+                      <Typography
+                        variant="subtitle1"
+                        style={{ color: "#1E1F1A" }}
+                      >
+                        Empty Cart
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                ) : (
+                  <React.Fragment>
+                    <List className={classes.listStyle}>
+                      {this.state.productCart.map((item, index) => {
+                        return (
+                          <>
+                            <ListItem
+                              divider
+                              className={classes.hoveringStyle}
+                              key={index}
+                            >
+                              <Grid container>
+                                <Grid item xs={8}>
+                                  <ListItemText
+                                    primary={
+                                      <Typography
+                                        variant="h6"
+                                        style={{ fontWeight: "bold" }}
+                                      >
+                                        {item.name}
+                                      </Typography>
+                                    }
+                                    secondary={
+                                      <div>
+                                        <div>ProductID: {item.id}</div>
+                                        <div>Unit: {item.unit}</div>
+                                      </div>
+                                    }
+                                  />
+                                </Grid>
+                                <Grid item xs={3}>
+                                  <ListItemText
+                                    primary={
+                                      <React.Fragment>
+                                        <div>
+                                          <TextField
+                                            key={index}
+                                            name={"product" + index}
+                                            id={"product" + index}
+                                            variant="outlined"
+                                            style={{
+                                              width: "90%",
+                                              marginBottom: "1vh",
+                                              marginTop: "1vh",
+                                            }}
+                                            size="small"
+                                            type="number"
+                                            onChange={this.quantitiesChange(
+                                              index
+                                            )}
+                                            InputProps={{
+                                              inputProps: {
+                                                min: 1,
+                                              },
+                                            }}
+                                            defaultValue={item.quantities}
+                                          />
+                                          <div>
+                                            <div style={{ fontSize: "16px" }}>
+                                              Price:{" "}
+                                              {numberWithCommas(item.price)}
+                                            </div>
+                                            <div
+                                              style={{
+                                                fontWeight: "bold",
+                                                fontSize: "17px",
+                                              }}
+                                            >
+                                              Total:{" "}
+                                              {numberWithCommas(
+                                                item.price * item.quantities
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </React.Fragment>
+                                    }
+                                  />
+                                </Grid>
+                                <Grid item xs={1}>
+                                  <ListItemSecondaryAction>
+                                    <IconButton
+                                      edge="end"
+                                      aria-label="Delete"
+                                      key="buttonDelete"
+                                      onClick={() =>
+                                        this.handleDeleteProduct(index)
+                                      }
+                                    >
+                                      <DeleteOutlineIcon color="secondary" />
+                                    </IconButton>
+                                  </ListItemSecondaryAction>
+                                </Grid>
+                              </Grid>
+                            </ListItem>
+                          </>
+                        );
+                      })}
+                    </List>
+                  </React.Fragment>
+                )}
               </div>
             </Paper>
           </Grid>
@@ -583,7 +563,96 @@ class connectedCashierUI extends React.Component {
             <Grid item xs={12} sm={6} container>
               <Paper className={classes.paper}>
                 <Grid container spacing={1}>
-                  <CustomerInfo />
+                  <Grid item xs={12} sm={8}>
+                    <Autocomplete
+                      id="combo-box-demo"
+                      options={this.state.allCustomer}
+                      onChange={this.handleChooseCustomer}
+                      getOptionLabel={(option) => option.name}
+                      renderOption={(option) => (
+                        <React.Fragment>
+                          {option.name} - Phone: {option.mobileNo}
+                        </React.Fragment>
+                      )}
+                      // style={{ width: 300 }}
+                      size="small"
+                      renderInput={(params) => (
+                        <TextField
+                          key="searchCustomer"
+                          id="searchCustomer"
+                          name="searchCustomer"
+                          {...params}
+                          label="Search Customer..."
+                          variant="outlined"
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      fullWidth
+                      onClick={() => this.handleAddCustomer()}
+                    >
+                      Create New
+                    </Button>
+                    <AddCustomer
+                      open={this.state.showDialog}
+                      onClose={this.handleClose}
+                      maxWidth="sm"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <div className={classes.titleStyle}> Customer Name</div>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    {this.state.customer.name.length >= 1 ? (
+                      <>{this.state.customer.name}</>
+                    ) : this.props.customerInfo ? (
+                      <>{this.props.customerInfo.name}</>
+                    ) : (
+                      "New Customer"
+                    )}
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <div className={classes.titleStyle}>Customer ID</div>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    {this.props.customerId ? (
+                      <>{this.props.customerId}</>
+                    ) : (
+                      <>{this.state.customer.id}</>
+                    )}
+                  </Grid>
+                  <Grid item xs={12} sm={6} className={classes.titleStyle}>
+                    Customer Pay
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      key={99}
+                      id="customerPay"
+                      name="customerPay"
+                      type="number"
+                      size="small"
+                      InputProps={{
+                        inputProps: {
+                          min: 0,
+                        },
+                      }}
+                      defaultValue={this.state.price.customerPay}
+                      onChange={this.handleChange("customerPay")}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} className={classes.titleStyle}>
+                    Change
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    {this.state.price.change}
+                  </Grid>
                 </Grid>
               </Paper>
             </Grid>
@@ -608,9 +677,12 @@ class connectedCashierUI extends React.Component {
 const mapStateToProps = (state) => {
   const { alert } = state;
   const { product } = state.productAdder;
+  const { customerInfo, customerId } = state.customer;
   return {
     alert,
     product,
+    customerInfo,
+    customerId,
   };
 };
 const mapDispatchToProps = (dispatch) => {

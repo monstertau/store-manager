@@ -188,6 +188,7 @@ function connectedProductTable(props) {
                 // delete product.barcode;
                 // console.log(product)
                 props.addProduct(product);
+                rowData.quantities--;
               },
             },
           ]}

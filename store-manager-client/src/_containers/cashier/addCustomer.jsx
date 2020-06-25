@@ -15,6 +15,7 @@ import EmailIcon from "@material-ui/icons/Email";
 import BusinessIcon from "@material-ui/icons/Business";
 import PhoneAndroidIcon from "@material-ui/icons/PhoneAndroid";
 import { customerService } from "../../_services/customer.service";
+import { connect } from "react-redux";
 
 import {
   Dialog,
@@ -24,12 +25,13 @@ import {
   DialogTitle,
   DialogActions,
 } from "@material-ui/core";
+import { customerActions } from "../../_actions/customer.actions";
 const useStyles = makeStyles((theme) => ({
   dialog: {
     margin: theme.spacing(3),
   },
 }));
-export function AddCustomer(props) {
+function ConnectedAddCustomer(props) {
   const classes = useStyles();
   const [state, setState] = React.useState({
     name: "",
@@ -44,6 +46,8 @@ export function AddCustomer(props) {
     });
   };
   const handleSubmit = () => {
+    console.log(state);
+    props.addCustomer(state);
   };
   return (
     <div>
@@ -132,6 +136,7 @@ export function AddCustomer(props) {
                     id="mobileNo"
                     name="mobileNo"
                     label="Mobile Number"
+                    type="number"
                     fullWidth
                     variant="outlined"
                     onChange={handleChange("mobileNo")}
@@ -147,7 +152,7 @@ export function AddCustomer(props) {
           <Button onClick={props.onClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={props.onSubmit} color="primary">
+          <Button onClick={handleSubmit} color="primary">
             Add
           </Button>
         </DialogActions>
@@ -155,9 +160,25 @@ export function AddCustomer(props) {
     </div>
   );
 }
-AddCustomer.propTypes = {
+ConnectedAddCustomer.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
   maxWidth: PropTypes.string,
 };
+const mapStateToProps = (state) => {
+  const { customer } = state.customer;
+  return {
+    customer,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addCustomer: (customer) => dispatch(customerActions.addCustomer(customer)),
+  };
+};
+const AddCustomer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedAddCustomer);
+export { AddCustomer };
