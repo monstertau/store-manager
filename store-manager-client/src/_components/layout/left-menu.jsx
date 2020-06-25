@@ -17,7 +17,7 @@ import InboxIcon from "@material-ui/icons/Inbox";
 import PaymentIcon from "@material-ui/icons/Payment";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
-import AddBoxIcon from '@material-ui/icons/AddBox';
+import AddBoxIcon from "@material-ui/icons/AddBox";
 const useStyles = makeStyles((theme) => ({
   sidebar: {
     paddingLeft: "1.5rem",
@@ -60,11 +60,6 @@ const MainItems = [
 ];
 const SecondaryItems = [
   {
-    primary: "Report",
-    path: "/report",
-    icon: BarChartIcon,
-  },
-  {
     primary: "Employee",
     path: "/employee",
     icon: PeopleIcon,
@@ -83,6 +78,11 @@ const SecondaryItems = [
     primary: "Invoice",
     path: "/invoice",
     icon: PaymentIcon,
+  },
+  {
+    primary: "Report",
+    path: "/report",
+    icon: BarChartIcon,
   },
 ];
 const ThirdItems = [
