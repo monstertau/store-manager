@@ -151,7 +151,7 @@ export default function CustomizedDialogs(props) {
                 <Grid item xs={5}>
                   <Typography>
                     <b>Grand Total</b>: {props.rowObj.total}
-                    {state.totalCompute}
+                    {/* {state.totalCompute} */}
                   </Typography>
                 </Grid>
               </Grid>

@@ -43,3 +43,6 @@
   flex-direction: row !important;
 }
 
+.MuiTableCell-root {
+  padding: 10px !important;
+}

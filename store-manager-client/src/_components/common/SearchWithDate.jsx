@@ -18,7 +18,7 @@ function isValidDate(d) {
 }
 const useStyles = makeStyles((theme) => ({
   outlinePicker: {
-    // margin: "0 auto",
+    margin: "0 auto",
     // marginLeft: "12px",
     // marginRight: "4rem",
   },
@@ -87,8 +87,12 @@ function ConnectedSearchWithDate(props) {
   };
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <Grid container spacing={4} className={classes.outlinePicker}>
-        <Grid container item xs={12} sm={4}>
+      <Grid
+        container
+        spacing={props.boobutton ? 0 : 4}
+        className={classes.outlinePicker}
+      >
+        <Grid container item xs={12} sm={props.boobutton ? 5 : 4}>
           <KeyboardDatePicker
             disableToolbar
             variant="inline"
@@ -104,7 +108,7 @@ function ConnectedSearchWithDate(props) {
             }}
           />
         </Grid>
-        <Grid container item xs={12} sm={4}>
+        <Grid container item xs={12} sm={props.boobutton ? 5 : 4}>
           <KeyboardDatePicker
             disableToolbar
             variant="inline"
@@ -120,30 +124,22 @@ function ConnectedSearchWithDate(props) {
             }}
           />
         </Grid>
-        <Grid container item xs={12} sm={2}>
-          <Button
-            className={classes.buttonPicker}
-            variant="contained"
-            size="large"
-            color="primary"
-            onClick={handleThisMonthChange}
-            style={{ backgroundColor: "#F27E63" }}
-          >
-            This month
-          </Button>
-          {/* <Button
-            className={classes.buttonPicker}
-            variant="contained"
-            size="large"
-            color="primary"
-            onClick={handleThisMonthChange}
-            startIcon={<Search />}
-            style={{ backgroundColor: "#D95284" }}
-          >
-            Search
-          </Button> */}
-        </Grid>
-        {/* <Grid container item xs={12} sm={2}></Grid> */}
+        {props.boobutton ? (
+          <></>
+        ) : (
+          <Grid container item xs={12} sm={2}>
+            <Button
+              className={classes.buttonPicker}
+              variant="contained"
+              size="large"
+              color="primary"
+              onClick={handleThisMonthChange}
+              style={{ backgroundColor: "#F27E63" }}
+            >
+              This month
+            </Button>
+          </Grid>
+        )}
       </Grid>
     </MuiPickersUtilsProvider>
   );
@@ -177,4 +173,5 @@ export default SearchWithDate;
 
 SearchWithDate.prototype = {
   onSearchChange: PropTypes.func,
+  boobutton: PropTypes.bool,
 };
