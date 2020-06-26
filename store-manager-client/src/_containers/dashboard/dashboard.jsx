@@ -23,9 +23,11 @@ import {
   getLastMonth,
   getLastYear,
 } from "../../_utils/currentDate";
+import { dashBoard } from "../../_services/dashboard.service";
+import { numberWithCommas } from "../../_utils";
 const smallStats = [
   {
-    label: "Pages",
+    label: "Customer",
     value: "182",
     percentage: "12.4%",
     increase: true,
@@ -43,7 +45,7 @@ const smallStats = [
     ],
   },
   {
-    label: "Posts",
+    label: "Revenue",
     value: "2,390",
     percentage: "4.7%",
     increase: true,
@@ -61,7 +63,7 @@ const smallStats = [
     ],
   },
   {
-    label: "Comments",
+    label: "Average Bill",
     value: "8,147",
     percentage: "3.8%",
     increase: false,
@@ -80,11 +82,11 @@ const smallStats = [
     ],
   },
   {
-    label: "Subscribers",
+    label: "Most Paid",
     value: "17,281",
     percentage: "2.4%",
-    increase: false,
-    decrease: true,
+    increase: true,
+    // decrease: false,
     chartLabels: [null, null, null, null, null, null, null],
     attrs: { md: "4", sm: "6" },
     datasets: [
@@ -137,6 +139,7 @@ function ConnectedDashbroad(props) {
       start: "",
       end: "",
     },
+    smallStats: [],
     open: true,
   });
   const handleCloseAlert = () => {
@@ -161,8 +164,8 @@ function ConnectedDashbroad(props) {
       start = "2010-01-01 06:52:05";
     }
     // resolve();
-    console.log(start, end);
-    let result = await reportService.getReport(10, start, end);
+    // console.log(start, end);
+    let result = await reportService.getReport(5, start, end);
     if (result.success === true) {
       // console.log(result.products);
       setState({
@@ -186,14 +189,96 @@ function ConnectedDashbroad(props) {
         yesterday,
         today
       );
-      if (result.success === true) {
+      let dashboard = await dashBoard.getDash("2010-01-01 06:52:05", today);
+
+      if (result.success === true && dashboard.success !== null) {
         // console.log(result.products);
         setState({
           ...state,
           productsData: result.products,
+          smallStats: [
+            {
+              label: "Customer",
+              value: numberWithCommas(dashboard.customerCount),
+              percentage: "12.4%",
+              increase: true,
+              chartLabels: [null, null, null, null, null, null, null],
+              attrs: { md: "6", sm: "6" },
+              datasets: [
+                {
+                  label: "Today",
+                  fill: "start",
+                  borderWidth: 1.5,
+                  backgroundColor: "rgba(23,198,113,0.1)",
+                  borderColor: "rgb(23,198,113)",
+                  data: [1, 2, 3, 3, 3, 4, 4],
+                },
+              ],
+            },
+            {
+              label: "Revenue",
+              value: numberWithCommas(dashboard.revenue),
+              percentage: "4.7%",
+              increase: true,
+              chartLabels: [null, null, null, null, null, null, null],
+              attrs: { md: "6", sm: "6" },
+              datasets: [
+                {
+                  label: "Today",
+                  fill: "start",
+                  borderWidth: 1.5,
+                  backgroundColor: "rgba(0, 184, 216, 0.1)",
+                  borderColor: "rgb(0, 184, 216)",
+                  data: [1, 2, 1, 3, 5, 4, 7],
+                },
+              ],
+            },
+            {
+              label: "Average Bill",
+              value: numberWithCommas(parseInt(dashboard.averagePricePerBill)),
+              percentage: "3.8%",
+              increase: false,
+              decrease: true,
+              chartLabels: [null, null, null, null, null, null, null],
+              attrs: { md: "4", sm: "6" },
+              datasets: [
+                {
+                  label: "Today",
+                  fill: "start",
+                  borderWidth: 1.5,
+                  backgroundColor: "rgba(255,180,0,0.1)",
+                  borderColor: "rgb(255,180,0)",
+                  data: [2, 3, 3, 3, 4, 3, 3],
+                },
+              ],
+            },
+            {
+              label: "Most Paid",
+              value: numberWithCommas(dashboard.mostPaidCustomerList[0].total),
+              percentage: "2.4%",
+              increase: false,
+              decrease: true,
+              chartLabels: [null, null, null, null, null, null, null],
+              attrs: { md: "4", sm: "6" },
+              datasets: [
+                {
+                  label: "Today",
+                  fill: "start",
+                  borderWidth: 1.5,
+                  backgroundColor: "rgb(0,123,255,0.1)",
+                  borderColor: "rgb(0,123,255)",
+                  data: [3, 2, 3, 2, 4, 5, 4],
+                },
+              ],
+            },
+          ],
         });
       } else {
-        props.alertError(result.message);
+        if (result.success === false) {
+          props.alertError(result.message);
+        } else if (dashboard.success === false) {
+          props.alertError(dashboard.message);
+        }
       }
       resolve();
     });
@@ -210,7 +295,7 @@ function ConnectedDashbroad(props) {
         />
       )}
       <Grid container justify="center">
-        {smallStats.map((stats, idx) => (
+        {state.smallStats.map((stats, idx) => (
           // <Paper>
           <Grid item md={3} xs={5} key={idx}>
             <SmallStats

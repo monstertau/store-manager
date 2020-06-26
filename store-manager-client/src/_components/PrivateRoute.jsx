@@ -117,7 +117,7 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap className={classes.noword}>
-            Shopee Sịn
+            Store Manager
           </Typography>
           <CustomHeader></CustomHeader>
         </Toolbar>

@@ -170,7 +170,7 @@ class UsersOverview extends React.Component {
 }
 
 UsersOverview.defaultProps = {
-  title: "Users Overview",
+  title: "Revenue Overview",
   chartData: {
     labels: Array.from(new Array(30), (_, i) => (i === 0 ? 1 : i)),
     datasets: [

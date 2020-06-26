@@ -284,7 +284,7 @@ function ConnectediProduct(props) {
             onRowDelete: (oldData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
-                  let msgRemove = await buyService.deleteSell(oldData.id);
+                  let msgRemove = await buyService.deleteBuy(oldData.id);
                   if (msgRemove.success === true) {
                     setState((prevState) => {
                       let dataDelete = [...prevState.data];
