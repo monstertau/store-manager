@@ -5,9 +5,11 @@ import Chart from "../layout/chart";
 import { withStyles } from "@material-ui/styles";
 import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import { Grid, Divider } from "@material-ui/core";
+import SearchWithDate from "./SearchWithDate";
 
 const styles = (theme) => ({
   CardHeader: {
@@ -19,6 +21,9 @@ const styles = (theme) => ({
     paddingRight: "1.1rem",
     display: "flex",
     flexDirection: "row-reverse",
+    minHeight: "39px",
+    maxHeight: "44px",
+    margin: "auto 0",
   },
   canvas: {
     maxWidth: "100% !important",
@@ -34,6 +39,9 @@ const styles = (theme) => ({
     borderBottom: "1px solid #e1e5eb!important",
     padding: "7px 0",
     backgroundColor: "#fbfbfb!important",
+  },
+  buttonGroup: {
+    padding: "2rem",
   },
 });
 class UsersOverview extends React.Component {
@@ -127,7 +135,15 @@ class UsersOverview extends React.Component {
         <CardContent className={classes.paddingZero}>
           <Grid container className={classes.controlBar}>
             <Grid item xs={8}>
-              {/* <RangeDatePicker /> */}
+              <ButtonGroup
+                color="primary"
+                aria-label="outlined primary button group"
+                style={{ paddingLeft: "1rem" }}
+              >
+                <Button>Day</Button>
+                <Button>Month</Button>
+                <Button>Year</Button>
+              </ButtonGroup>
             </Grid>
             <Grid item xs={4} className={classes.buttonRedirect}>
               <Button

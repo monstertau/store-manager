@@ -3,7 +3,7 @@ import SmallStats from "../../_components/common/smallStats";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import UsersOverview from "../../_components/common/ChartOverview";
-import { Divider, Card } from "@material-ui/core";
+import { Divider, Card, CardActions } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Order from "../report/Orders";
 import { reportService } from "../../_services/report.service";
@@ -16,6 +16,13 @@ import Select from "@material-ui/core/Select";
 import Button from "@material-ui/core/Button";
 import CustomAlert from "../../_components/common/CustomAlert";
 import { Bill } from "../bill/Bill";
+import RedirectDash from "./viewDetail";
+import {
+  getYesterday,
+  getToday,
+  getLastMonth,
+  getLastYear,
+} from "../../_utils/currentDate";
 const smallStats = [
   {
     label: "Pages",
@@ -99,31 +106,36 @@ const useStyles = makeStyles((theme) => ({
   },
   CardContent: {
     padding: "12px",
-    paddingBottom: "12px !important",
+    // display: "flex",
+    // height: "100%",
+    position: "relative",
   },
   controlBar: {
-    padding: "10px 0",
+    padding: "20px 0 10px 0",
+    // width: "95%",
+    // paddingTop: "3%",
+    // position: "absolute",
+    // height: "100%",
+    // verticalAlign: "sub",
   },
   selectProduct: {
     border: "1px solid #eee !important",
     paddingLeft: "12px",
   },
-  buttonRedirect: { marginLeft: "auto", marginRight: 0 },
+  buttonRedirect: { marginLeft: "auto", marginRight: "0" },
 }));
 function ConnectedDashbroad(props) {
   const classes = useStyles();
   const [state, setState] = React.useState({
+    productsData: [],
     products: {
-      data: [],
-      search: {
-        start: "",
-        end: "",
-      },
+      start: "",
+      end: "",
     },
     report: {
       length: "5",
-      start: "2018-01-30 06:52:05",
-      end: "2018-12-30 06:52:05",
+      start: "",
+      end: "",
     },
     open: true,
   });
@@ -133,19 +145,52 @@ function ConnectedDashbroad(props) {
   const handleChange = (page) => {
     props.history.push(page);
   };
+  const handleChangeProduct = async (event) => {
+    var choose = event.target.value;
+    // new Promise(async (resolve, reject) => {
+    var today = new Date();
+    var end = await getToday(today);
+    var start = "";
+    if (choose == 0) {
+      start = await getYesterday(today);
+    } else if (choose == 1) {
+      start = await getLastMonth(today);
+    } else if (choose == 2) {
+      start = await getLastYear(today);
+    } else {
+      start = "2010-01-01 06:52:05";
+    }
+    // resolve();
+    console.log(start, end);
+    let result = await reportService.getReport(10, start, end);
+    if (result.success === true) {
+      // console.log(result.products);
+      setState({
+        ...state,
+        productsData: result.products,
+      });
+    } else {
+      props.alertError(result.message);
+    }
+    // });
+  };
   useEffect(() => {
     props.alertClear();
     new Promise(async (resolve, reject) => {
+      let date = new Date();
+      let today = await getToday(date);
+      let yesterday = await getYesterday(date);
+      // console.log(start, end);
       let result = await reportService.getReport(
         state.report.length,
-        state.report.start,
-        state.report.end
+        yesterday,
+        today
       );
       if (result.success === true) {
         // console.log(result.products);
         setState({
           ...state,
-          products: { data: result.products },
+          productsData: result.products,
         });
       } else {
         props.alertError(result.message);
@@ -187,15 +232,23 @@ function ConnectedDashbroad(props) {
         <Grid item md={7} xs={12}>
           <UsersOverview />
         </Grid>
-        <Grid item md={4} xs={12} style={{ marginLeft: "5%" }}>
-          <Card>
+        <Grid
+          item
+          md={4}
+          xs={12}
+          style={{ marginLeft: "5%", position: "relative" }}
+        >
+          <Card
+          // style={{ height: "100%" }}
+          >
             <CardHeader
               title="Most Sold Product"
               className={classes.CardHeader}
             ></CardHeader>
+            <Divider></Divider>
             <CardContent className={classes.CardContent}>
               <Orders
-                products={state.products.data}
+                products={state.productsData}
                 data={[
                   { column: "Name", row: "name", type: "text" },
                   {
@@ -204,23 +257,25 @@ function ConnectedDashbroad(props) {
                     type: "text",
                   },
                 ]}
+                // style={{ margin: "auto 0", paddingBottom: "5%" }}
               />
               <Grid container className={classes.controlBar}>
                 <Select
                   native
-                  value={state.age}
+                  value={state.rAge}
                   className={classes.selectProduct}
                   inputProps={{
                     name: "age",
                     id: "age-native-simple",
                   }}
+                  onChange={handleChangeProduct}
                 >
-                  <option aria-label="This Month" value="">
+                  <option aria-label="This Month" value={0}>
                     Today
                   </option>
-                  <option value={10}>This Month</option>
-                  <option value={20}>This Year</option>
-                  <option value={30}>All time</option>
+                  <option value={1}>This Month</option>
+                  <option value={2}>This Year</option>
+                  <option value={3}>All time</option>
                 </Select>
                 <Button
                   className={classes.buttonRedirect}
@@ -228,10 +283,10 @@ function ConnectedDashbroad(props) {
                   variant="outlined"
                   onClick={(e) => {
                     e.preventDefault();
-                    handleChange("/customers");
+                    handleChange("/inventory");
                   }}
                 >
-                  All Customers<span>&rarr;</span>
+                  All Inventory<span>&rarr;</span>
                 </Button>
               </Grid>
             </CardContent>
@@ -240,7 +295,7 @@ function ConnectedDashbroad(props) {
       </Grid>
       <Grid container>
         <Grid item xs={4}>
-          abc
+          <RedirectDash />
         </Grid>
         <Grid item xs={8}>
           <Bill />
