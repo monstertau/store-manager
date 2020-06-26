@@ -164,8 +164,8 @@ function ConnectedDashbroad(props) {
       start = "2010-01-01 06:52:05";
     }
     // resolve();
-    console.log(start, end);
-    let result = await reportService.getReport(10, start, end);
+    // console.log(start, end);
+    let result = await reportService.getReport(5, start, end);
     if (result.success === true) {
       // console.log(result.products);
       setState({

@@ -18,7 +18,8 @@ const useStyles = (theme) => ({
   },
 });
 const handleDashboard = (path) => {
-  return <Redirect to={{ pathname: path }} />;
+  window.location.href = path;
+  // return <Redirect to={{ pathname: path }} />;
   // console.log(this.context.router.push("/path"));
 };
 class HomePage extends React.Component {
@@ -53,7 +54,10 @@ class HomePage extends React.Component {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleDashboard("/cashier")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDashboard("/cashierui");
+                  }}
                 >
                   Go to Cashier UI
                 </Button>
@@ -62,7 +66,10 @@ class HomePage extends React.Component {
                 <Button
                   variant="outlined"
                   color="primary"
-                  onClick={handleDashboard("/dashbroad")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDashboard("/dashboard");
+                  }}
                 >
                   Go to Dashboard
                 </Button>
