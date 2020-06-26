@@ -17,10 +17,10 @@ const useStyles = (theme) => ({
     marginTop: theme.spacing(4),
   },
 });
-const handleDashboard = () => {
-  return <Redirect to={{ pathname: "/login" }} />;
-    // console.log(this.context.router.push("/path"));
-}
+const handleDashboard = (path) => {
+  return <Redirect to={{ pathname: path }} />;
+  // console.log(this.context.router.push("/path"));
+};
 class HomePage extends React.Component {
   render() {
     const { classes } = this.props;
@@ -53,13 +53,17 @@ class HomePage extends React.Component {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleDashboard}
+                  onClick={handleDashboard("/cashier")}
                 >
                   Go to Cashier UI
                 </Button>
               </Grid>
               <Grid item>
-                <Button variant="outlined" color="primary">
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleDashboard("/dashbroad")}
+                >
                   Go to Dashboard
                 </Button>
               </Grid>
