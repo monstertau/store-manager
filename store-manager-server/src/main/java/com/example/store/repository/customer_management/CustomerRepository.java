@@ -22,6 +22,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT e FROM Customer e  ORDER BY e.createdAt ASC")
     Page<Customer> getAllCustomersPagable(Pageable pageable);
 
+    @Query("SELECT count(e) FROM Customer e  WHERE e.createdAt >= STR_TO_DATE(:start, '%Y-%m-%d %H:%i:%s') AND e.createdAt <= STR_TO_DATE(:end, '%Y-%m-%d %H:%i:%s')")
+    Integer countCustomer(String start,String end);
     @Query("SELECT e FROM Customer e WHERE e.name LIKE %:name% AND e.email LIKE %:email% AND e.address LIKE %:address% AND e.mobileNo LIKE %:mobileNo% AND ( e.name LIKE %:value% OR e.email LIKE %:value% OR e.address LIKE %:value% OR e.mobileNo LIKE %:value% )  ORDER BY e.createdAt ASC")
     Page<Customer> searchCustomers(@Param("value") String value, @Param("name") String name, @Param("email") String email, @Param("address") String address, @Param("mobileNo") String mobileNo, Pageable pageable);
 }

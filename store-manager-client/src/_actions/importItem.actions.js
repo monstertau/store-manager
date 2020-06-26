@@ -1,14 +1,13 @@
-import { ProductAdderConstants } from "../_constants/productAdder.constants";
+import { importItemConstants } from "../_constants";
 import { alertActions } from "./alert.actions";
-
-export const productAdderActions = {
+export const importItemActions = {
   addProduct,
   addedProductClear,
 };
 function addProduct(product) {
   return (dispatch) => {
     if (product) {
-      dispatch(alertActions.success("Added " + product.name + " to cart."));
+      dispatch(alertActions.success("Import Item Successfully."));
       dispatch(success(product));
     } else {
       dispatch(alertActions.error("Product Error."));
@@ -17,16 +16,16 @@ function addProduct(product) {
   };
   function success(product) {
     return {
-      type: ProductAdderConstants.ADD_PRODUCT_SUCCESS,
-      product: product,
+      type: importItemConstants.IMPORT_ITEM_SUCCESS,
+      importItem: product,
     };
   }
   function failure() {
     return {
-      type: ProductAdderConstants.ADD_PRODUCT_FAILURE,
+      type: importItemConstants.IMPORT_ITEM_FAILURE,
     };
   }
 }
 function addedProductClear() {
-  return { type: ProductAdderConstants.ADDED_PRODUCT_CLEAR };
+  return { type: importItemConstants.IMPORT_ITEM_CLEAR };
 }

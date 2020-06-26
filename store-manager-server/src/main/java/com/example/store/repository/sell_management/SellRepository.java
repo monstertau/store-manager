@@ -1,5 +1,6 @@
 package com.example.store.repository.sell_management;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.example.store.model.sell_management.Sell;
@@ -27,4 +28,10 @@ public interface SellRepository extends JpaRepository<Sell, Long> {
     Page<Sell> findByDate(String start, String end, Pageable pageable);
 
     Page<Sell> findAll(Pageable pageable);
+
+    @Query("SELECT e.total from Sell e WHERE e.createdAt >= STR_TO_DATE(:start, '%Y-%m-%d %H:%i:%s') AND e.createdAt <= STR_TO_DATE(:end, '%Y-%m-%d %H:%i:%s')")
+    List<Float> findTotalPerBill(String start,String end);
+
+    @Query("SELECT new com.example.store.repository.sell_management.MostPaidCustomer(e.customer_id, sum(e.total) ) from Sell e WHERE e.createdAt >= STR_TO_DATE(:start, '%Y-%m-%d %H:%i:%s') AND e.createdAt <= STR_TO_DATE(:end, '%Y-%m-%d %H:%i:%s') AND e.customer_id IS NOT NULL GROUP BY e.customer_id ORDER BY sum(e.total) DESC")
+    List<MostPaidCustomer> findMostPaidCustomer(String start,String end);
 }

@@ -19,6 +19,7 @@ import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
+import { AddImportBill } from "./addImportBill";
 
 const columnProducts = [
   { column: "ID", row: "product_id", type: "text" },
@@ -87,6 +88,12 @@ function ConnectediProduct(props) {
   };
   const handleClose = () => {
     setOpen(false);
+  };
+  const handleAddImportBillClose = () => {
+    setState({
+      ...state,
+      dialogOpen: false,
+    });
   };
   const handleChangeSearch = async (e) => {
     new Promise(async (resolve, reject) => {
@@ -264,6 +271,12 @@ function ConnectediProduct(props) {
           </ExpansionPanelActions>
         </ExpansionPanel>
         <Divider />
+        <AddImportBill
+          open={state.dialogOpen}
+          onClose={handleAddImportBillClose}
+          maxWidth="md"
+          onSubmit={handleAddImportBillClose}
+        />
         <MaterialTable
           title="Import Products View"
           columns={column}
@@ -303,6 +316,17 @@ function ConnectediProduct(props) {
             },
           }}
           actions={[
+            {
+              icon: tableIcons.Add,
+              tooltip: "Add Import Bill",
+              position: "toolbar",
+              onClick: (event, rowData) => {
+                setState({
+                  ...state,
+                  dialogOpen: true,
+                });
+              },
+            },
             {
               icon: tableIcons.View,
               tooltip: "Details",

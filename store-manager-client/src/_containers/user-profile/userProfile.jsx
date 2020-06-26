@@ -24,6 +24,7 @@ import { userService } from "../../_services";
 import CustomAlert from "../../_components/common/CustomAlert";
 import { AddEmployee } from "../employee/addEmployee";
 import SearchWithDate from "../../_components/common/SearchWithDate";
+import { AddImportBill } from "../importProduct/addImportBill";
 const useStyles = (theme) => ({
   layout: {
     width: "auto",
@@ -297,7 +298,7 @@ class userProfile extends React.Component {
                   >
                     <VpnKeyIcon /> Change password
                   </Button>
-                  <AddEmployee
+                  <AddImportBill
                     open={this.state.openDialog}
                     onClose={this.handleCloseDialog}
                     maxWidth="md"
@@ -310,9 +311,7 @@ class userProfile extends React.Component {
               <CircularProgress color="secondary" />
               </Grid>
             )}
-            <Grid item xs={12}>
-              <SearchWithDate />
-            </Grid>
+            
           </Grid>
         </Paper>
 

@@ -6,7 +6,16 @@ export const alertActions = {
   clear,
 };
 function success(message) {
-  return { type: alertConstants.SUCCESS, message };
+  return (dispatch) => {
+    dispatch(clear());
+    dispatch(success(message));
+  };
+  function success() {
+    return { type: alertConstants.SUCCESS, message };
+  }
+  function clear() {
+    return { type: alertConstants.CLEAR };
+  }
 }
 
 function error(message) {

@@ -136,6 +136,7 @@ function connectedProductTable(props) {
   };
   const handleCloseAlert = () => {
     setState({ ...state, open: false });
+    props.alertClear();
   };
   useEffect(() => {
     props.alertClear();
@@ -161,7 +162,7 @@ function connectedProductTable(props) {
     <div>
       {props.alert.message && (
         <CustomAlert
-          open={state.open}
+          open={props.alert.alertPopUp}
           autoHideDuration={2000}
           type={props.alert.type}
           onClose={handleCloseAlert}
@@ -229,16 +230,7 @@ function connectedProductTable(props) {
                 }}
               />
             ),
-            // Body: (props) => (
-            //   <MTableBody
-            //     {...props}
-            //     onFilterChanged={async (columnId, value) => {
-            //       props.onFilterChanged(columnId, value);
-            //       console.log(columnId, value);
-            //       setState({ ...state, search: {} });
-            //     }}
-            //   />
-            // ),
+           
           }}
         />
       </div>

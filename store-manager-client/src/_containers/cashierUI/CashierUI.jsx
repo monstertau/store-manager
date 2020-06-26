@@ -11,6 +11,7 @@ import {
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
+  CircularProgress,
 } from "@material-ui/core";
 import RemoveShoppingCartIcon from "@material-ui/icons/RemoveShoppingCart";
 import TextField from "@material-ui/core/TextField";
@@ -24,6 +25,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import TransactionDate from "./TransactionDate";
 import { billService } from "../../_services/bill.service";
 import { AddCustomer } from "../cashier/addCustomer";
+import { alertActions } from "../../_actions/alert.actions";
 const useStyles = (theme) => ({
   paper: {
     // height:"95%",
@@ -136,6 +138,7 @@ class connectedCashierUI extends React.Component {
       productCart: [],
       allCustomer: [{ id: 0, name: "null" }],
       showDialog: false,
+      submitedBill: true,
     };
   }
 
@@ -179,6 +182,11 @@ class connectedCashierUI extends React.Component {
     if (this.props.customerInfo !== nextProps.customerInfo) {
       this.setState({
         showDialog: false,
+        customer: {
+          name: nextProps.customerInfo.name,
+          id: nextProps.customerId,
+          email: nextProps.customerInfo.email,
+        },
       });
     }
     console.log(this.state);
@@ -216,13 +224,18 @@ class connectedCashierUI extends React.Component {
   };
   handleProceed = () => {
     if (this.state.productCart.length >= 1) {
+      this.setState({
+        submitedBill: false,
+      });
       const newSell = {};
+      // cashier id & tax
       newSell.user_id = this.state.cashier.id;
       newSell.tax = this.state.price.tax / 100;
       // newSell.billService.createNewSell();
       if (this.state.customer.id > 0) {
         newSell.customer_id = this.state.customer.id;
       }
+
       newSell.total = parseInt(
         this.state.productCart.reduce(
           (subTotal, item) => subTotal + item.price * item.quantities,
@@ -238,12 +251,36 @@ class connectedCashierUI extends React.Component {
         sell_item.quantities = item.quantities;
         newSell.sell_items.push(sell_item);
       });
-
-      billService.createNewSell(newSell).then((data) => {
-        if (data.success === true) {
-          this.handleDiscard();
+      setTimeout(() => {
+        if (
+          this.state.price.customerPay >
+          parseInt(
+            this.state.productCart.reduce(
+              (subTotal, item) => subTotal + item.price * item.quantities,
+              0
+            ) *
+              (1 + this.state.price.tax / 100)
+          )
+        ) {
+          billService.createNewSell(newSell).then((data) => {
+            // console.log(data);
+            if (data.success === true) {
+              this.setState({
+                submitedBill: true,
+              });
+              this.handleDiscard();
+              this.props.alertSuccess("Buy success!");
+            }
+          });
+        } else {
+          this.props.alertError("Customer Pay sufficient fund!");
+          this.setState({
+            submitedBill: true,
+          });
         }
-      });
+      }, 1000);
+    }else{
+      this.props.alertError("Cart must not empty!");
     }
   };
   handleChooseCustomer = (event, value) => {
@@ -401,8 +438,13 @@ class connectedCashierUI extends React.Component {
               color="primary"
               className={classes.ProceedStyle}
               onClick={() => this.handleProceed()}
+              fullWidth
             >
-              PROCEED
+              {this.state.submitedBill ? (
+                "PROCEED"
+              ) : (
+                <CircularProgress color="secondary" />
+              )}
             </Button>
           </Grid>
         </React.Fragment>
@@ -500,7 +542,7 @@ class connectedCashierUI extends React.Component {
                                                 min: 1,
                                               },
                                             }}
-                                            defaultValue={item.quantities}
+                                            value={item.quantities}
                                           />
                                           <div>
                                             <div style={{ fontSize: "16px" }}>
@@ -610,8 +652,6 @@ class connectedCashierUI extends React.Component {
                   <Grid item xs={12} sm={6}>
                     {this.state.customer.name.length >= 1 ? (
                       <>{this.state.customer.name}</>
-                    ) : this.props.customerInfo ? (
-                      <>{this.props.customerInfo.name}</>
                     ) : (
                       "New Customer"
                     )}
@@ -621,11 +661,7 @@ class connectedCashierUI extends React.Component {
                     <div className={classes.titleStyle}>Customer ID</div>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    {this.props.customerId ? (
-                      <>{this.props.customerId}</>
-                    ) : (
-                      <>{this.state.customer.id}</>
-                    )}
+                    {this.state.customer.id}
                   </Grid>
                   <Grid item xs={12} sm={6} className={classes.titleStyle}>
                     Customer Pay
@@ -651,7 +687,25 @@ class connectedCashierUI extends React.Component {
                     Change
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    {this.state.price.change}
+                    {this.state.price.customerPay >
+                    parseInt(
+                      this.state.productCart.reduce(
+                        (subTotal, item) =>
+                          subTotal + item.price * item.quantities,
+                        0
+                      ) *
+                        (1 + this.state.price.tax / 100)
+                    )
+                      ? this.state.price.customerPay -
+                        parseInt(
+                          this.state.productCart.reduce(
+                            (subTotal, item) =>
+                              subTotal + item.price * item.quantities,
+                            0
+                          ) *
+                            (1 + this.state.price.tax / 100)
+                        )
+                      : "0"}
                   </Grid>
                 </Grid>
               </Paper>
@@ -686,7 +740,11 @@ const mapStateToProps = (state) => {
   };
 };
 const mapDispatchToProps = (dispatch) => {
-  return {};
+  return {
+    alertSuccess: (message) => dispatch(alertActions.success(message)),
+    alertError: (message) => dispatch(alertActions.error(message)),
+    alertClear: () => dispatch(alertActions.clear()),
+  };
 };
 const CashierUIStyles = withStyles(useStyles)(connectedCashierUI);
 const CashierUI = connect(mapStateToProps, mapDispatchToProps)(CashierUIStyles);
