@@ -79,6 +79,7 @@ class userProfile extends React.Component {
         salary: 0,
         oldPassword: "",
         newPassword: "",
+        confirmPassword: "",
       },
     };
   }
@@ -144,9 +145,20 @@ class userProfile extends React.Component {
   handleChangePassword = () => {
     let oldPassword = this.state.userInfo.oldPassword;
     let newPassword = this.state.userInfo.newPassword;
-    console.log(oldPassword);
-    console.log(newPassword);
-    userService.changePassword(oldPassword, newPassword);
+    let confirmPassword = this.state.userInfo.confirmPassword;
+    if (newPassword === confirmPassword) {
+      userService.changePassword(oldPassword, newPassword).then((data) => {
+        if (data.accessToken) {
+          this.handleCloseDialog();
+          // window.location.reload;
+          this.props.alertSuccess("Change Password Success!");
+        } else {
+          this.props.alertError(data.message);
+        }
+      });
+    } else {
+      this.props.alertError("Wrong confirmed password!");
+    }
   };
   render() {
     const {
@@ -270,6 +282,7 @@ class userProfile extends React.Component {
                   fullWidth
                   variant="outlined"
                   disabled
+                  defaultValue="ADMIN"
                 />
               ) : (
                 <Skeleton animation="wave" height={50} />
@@ -298,24 +311,17 @@ class userProfile extends React.Component {
                   >
                     <VpnKeyIcon /> Change password
                   </Button>
-                  <AddImportBill
-                    open={this.state.openDialog}
-                    onClose={this.handleCloseDialog}
-                    maxWidth="md"
-                    onSubmit={this.handleCloseDialog}
-                  />
                 </Grid>
               </>
             ) : (
               <Grid item xs={12}>
-              <CircularProgress color="secondary" />
+                <CircularProgress color="secondary" />
               </Grid>
             )}
-            
           </Grid>
         </Paper>
 
-        {/* <Dialog
+        <Dialog
           open={this.state.openDialog}
           onClose={this.handleCloseDialog}
           aria-labelledby="form-dialog-title"
@@ -345,6 +351,7 @@ class userProfile extends React.Component {
                 label="Confirm Password"
                 variant="outlined"
                 fullWidth
+                onChange={this.handleChange("confirmPassword")}
               />
             </Grid>
           </DialogContent>
@@ -364,7 +371,7 @@ class userProfile extends React.Component {
               Change
             </Button>
           </DialogActions>
-        </Dialog> */}
+        </Dialog>
       </main>
     );
   }
@@ -391,6 +398,8 @@ const mapDispatchToProps = (dispatch) => {
     updateUserInfo: (userInfo) =>
       dispatch(userActions.updateUserInfo(userInfo)),
     alertClear: () => dispatch(alertActions.clear()),
+    alertSuccess: (message) => dispatch(alertActions.success(message)),
+    alertError: (message) => dispatch(alertActions.error(message)),
   };
 };
 const userProfileStyles = withStyles(useStyles)(userProfile);

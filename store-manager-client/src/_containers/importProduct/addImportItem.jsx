@@ -11,6 +11,7 @@ import {
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Paper from "@material-ui/core/Paper";
+import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import EmailIcon from "@material-ui/icons/Email";
 import BusinessIcon from "@material-ui/icons/Business";
@@ -27,8 +28,10 @@ import {
   DialogTitle,
   DialogActions,
 } from "@material-ui/core";
+import DialpadIcon from '@material-ui/icons/Dialpad';
 import { inventoryService } from "../../_services/inventory.service";
 import { supplierService } from "../../_services";
+import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 import { importItemActions } from "../../_actions/importItem.actions";
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -164,7 +167,7 @@ export function ConnectedAddImportItem(props) {
             <Grid item xs={12}>
               <ListItem>
                 <ListItemIcon>
-                  <FaceIcon color="primary" />
+                  <ShoppingBasketIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <Autocomplete
@@ -196,7 +199,7 @@ export function ConnectedAddImportItem(props) {
             <Grid item xs={12}>
               <ListItem>
                 <ListItemIcon>
-                  <AccountCircleIcon color="primary" />
+                  <MonetizationOnIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
@@ -219,7 +222,7 @@ export function ConnectedAddImportItem(props) {
             <Grid item xs={12} sm={6}>
               <ListItem>
                 <ListItemIcon>
-                  <BusinessIcon color="primary" />
+                  <FormatListNumberedIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
@@ -241,7 +244,7 @@ export function ConnectedAddImportItem(props) {
             <Grid item xs={12} sm={6}>
               <ListItem>
                 <ListItemIcon>
-                  <PhoneAndroidIcon color="primary" />
+                  <DialpadIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
@@ -263,7 +266,7 @@ export function ConnectedAddImportItem(props) {
             <Grid item xs={12}>
               <ListItem>
                 <ListItemIcon>
-                  <MonetizationOnIcon color="primary" />
+                  <BusinessIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <Autocomplete

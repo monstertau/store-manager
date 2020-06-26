@@ -16,6 +16,7 @@ import Orders from "./Orders";
 import { reportService } from "../../_services/report.service";
 import { numberWithCommas } from "../../_utils";
 import { Select } from "@material-ui/core";
+import { getToday } from "../../_utils/currentDate";
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -116,10 +117,12 @@ function ConnectedReport(props) {
   useEffect(() => {
     props.alertClear();
     new Promise(async (resolve, reject) => {
+      let date = await getToday(new Date());
+      console.log(date);
       let result = await reportService.getReport(
         state.report.length,
         state.report.start,
-        state.report.end
+        date
       );
       if (result.success === true) {
         // console.log(result.products);

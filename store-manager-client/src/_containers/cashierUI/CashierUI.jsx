@@ -545,6 +545,7 @@ class connectedCashierUI extends React.Component {
                                             value={item.quantities}
                                           />
                                           <div>
+                                            
                                             <div style={{ fontSize: "16px" }}>
                                               Price:{" "}
                                               {numberWithCommas(item.price)}
