@@ -55,7 +55,7 @@ public class ProductController {
 
     // Admin, Manager get a product type information
     @GetMapping("/products/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER','CASHIER')")
     public ResponseEntity<?> getProductInfor(@PathVariable(value = "id") String id) {
         try {
             Product product = productRepository.findById(Long.parseLong(id)).orElse(null);
@@ -76,7 +76,7 @@ public class ProductController {
 
     // Admin, Manager update a product type information
     @PutMapping("/products/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER','CASHIER')")
     public ResponseEntity<?> updateProductInfor(@PathVariable(value = "id") String id,
                                                 @Valid @RequestBody UpdateProductRequest updateProductRequest) {
         try {
@@ -99,7 +99,7 @@ public class ProductController {
 
     // Admin, Manager delete a product type
     @DeleteMapping("/products/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER','CASHIER')")
     public ResponseEntity<?> deleteProduct(@PathVariable(value = "id") String id) {
         try {
             Product product = productRepository.findById(Long.parseLong(id)).orElse(null);
@@ -114,7 +114,7 @@ public class ProductController {
 
     // Admin, Manager search product types
     @PostMapping("/search/products")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER','CASHIER')")
     public ResponseEntity<?> searchProducts(@Valid @RequestBody SearchProductsRequest searchProductsRequest) {
 
         Pageable pageable = new OffsetBasedPageRequest(searchProductsRequest.getStart(), searchProductsRequest.getLength());
