@@ -179,17 +179,19 @@ function connectedProductTable(props) {
               icon: tableIcons.AddProduct,
               tooltip: "Add to Cart",
               onClick: (event, rowData) => {
-                const product = {};
-                product.id = rowData.id;
-                product.name = rowData.name;
-                product.price = rowData.price;
-                product.unit = rowData.unit;
-                product.quantities = 1;
-                // delete product.tableData
-                // delete product.barcode;
-                // console.log(product)
-                props.addProduct(product);
-                rowData.quantities--;
+                if (rowData.quantities > 0) {
+                  const product = {
+                    id: rowData.id,
+                    name: rowData.name,
+                    price: rowData.price,
+                    unit: rowData.unit,
+                    quantities: 1,
+                  };
+                  props.addProduct(product);
+                  rowData.quantities--;
+                } else {
+                  props.alertError("Not enough " + rowData.name + " to add to cart!");
+                }
               },
             },
           ]}
@@ -230,7 +232,6 @@ function connectedProductTable(props) {
                 }}
               />
             ),
-           
           }}
         />
       </div>

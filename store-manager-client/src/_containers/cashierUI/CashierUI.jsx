@@ -194,14 +194,15 @@ class connectedCashierUI extends React.Component {
 
   quantitiesChange = (index) => (event) => {
     const value = event.target.value;
-    if (value) {
-      const newproductCart = this.state.productCart.slice();
-      newproductCart[index].quantities = parseInt(event.target.value);
-      this.setState({
-        productCart: newproductCart,
-      });
-    }
+    const newproductCart = this.state.productCart.slice();
 
+    if (value) {
+    }
+    newproductCart[index].quantities = parseInt(value);
+
+    this.setState({
+      productCart: newproductCart,
+    });
     console.log(event.target.value);
   };
   handleDeleteProduct = (index) => {
@@ -227,23 +228,21 @@ class connectedCashierUI extends React.Component {
       this.setState({
         submitedBill: false,
       });
-      const newSell = {};
-      // cashier id & tax
-      newSell.user_id = this.state.cashier.id;
-      newSell.tax = this.state.price.tax / 100;
-      // newSell.billService.createNewSell();
+      const newSell = {
+        user_id: this.state.cashier.id,
+        tax: this.state.price.tax / 100,
+        total: parseInt(
+          this.state.productCart.reduce(
+            (subTotal, item) => subTotal + item.price * item.quantities,
+            0
+          ) *
+            (1 + this.state.price.tax / 100)
+        ),
+        sell_items: [],
+      };
       if (this.state.customer.id > 0) {
         newSell.customer_id = this.state.customer.id;
       }
-
-      newSell.total = parseInt(
-        this.state.productCart.reduce(
-          (subTotal, item) => subTotal + item.price * item.quantities,
-          0
-        ) *
-          (1 + this.state.price.tax / 100)
-      );
-      newSell.sell_items = [];
       this.state.productCart.forEach((item) => {
         const sell_item = {};
         sell_item.product_id = item.id;
@@ -252,34 +251,44 @@ class connectedCashierUI extends React.Component {
         newSell.sell_items.push(sell_item);
       });
       setTimeout(() => {
-        if (
-          this.state.price.customerPay >
-          parseInt(
-            this.state.productCart.reduce(
-              (subTotal, item) => subTotal + item.price * item.quantities,
-              0
-            ) *
-              (1 + this.state.price.tax / 100)
-          )
-        ) {
-          billService.createNewSell(newSell).then((data) => {
-            // console.log(data);
-            if (data.success === true) {
-              this.setState({
-                submitedBill: true,
-              });
-              this.handleDiscard();
-              this.props.alertSuccess("Buy success!");
-            }
-          });
+        const total = parseInt(
+          this.state.productCart.reduce(
+            (subTotal, item) => subTotal + item.price * item.quantities,
+            0
+          ) *
+            (1 + this.state.price.tax / 100)
+        );
+        if (total) {
+          if (this.state.price.customerPay > total) {
+            billService.createNewSell(newSell).then((data) => {
+              // console.log(data);
+              if (data.success === true) {
+                this.setState({
+                  submitedBill: true,
+                });
+                this.handleDiscard();
+                this.props.alertSuccess("Buy success!");
+              } else {
+                this.setState({
+                  submitedBill: true,
+                });
+                this.props.alertError(data.message);
+              }
+            });
+          } else {
+            this.props.alertError("Customer Pay sufficient fund!");
+            this.setState({
+              submitedBill: true,
+            });
+          }
         } else {
-          this.props.alertError("Customer Pay sufficient fund!");
+          this.props.alertError("Wrong Quantity Input!");
           this.setState({
             submitedBill: true,
           });
         }
       }, 1000);
-    }else{
+    } else {
       this.props.alertError("Cart must not empty!");
     }
   };
@@ -545,7 +554,6 @@ class connectedCashierUI extends React.Component {
                                             value={item.quantities}
                                           />
                                           <div>
-                                            
                                             <div style={{ fontSize: "16px" }}>
                                               Price:{" "}
                                               {numberWithCommas(item.price)}
