@@ -32,8 +32,10 @@ const useStyles = makeStyles((theme) => ({
 export default function Orders(props) {
   var rows = [];
   props.products.map((e) => {
+    console.log(e)
     rows.push(e);
   });
+  
   const classes = useStyles();
   return (
     <React.Fragment>

@@ -20,6 +20,7 @@ import Dashbroad from "../dashboard/dashboard";
 import CashierUI from "../cashierUI/CashierUI";
 import { importProduct } from "../importProduct/importProduct";
 import Contact from "../contact/Contact";
+import InvoicePrint from "../cashierUI/invoice"
 export function App(props) {
   // const [setAnchorEl] = React.useState(null);
   return (
@@ -41,6 +42,7 @@ export function App(props) {
         <PrivateRoute component={Dashbroad} path="/dashboard" exact />
         <PrivateRoute component={CashierUI} path="/cashierui" exact />
         <PrivateRoute component={Contact} path="/contact" exact />
+        <Route component={InvoicePrint} path="/invoice-print/:id"/>
       </Switch>
     </BrowserRouter>
   );

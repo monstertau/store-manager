@@ -274,6 +274,22 @@ class userProfile extends React.Component {
                 <Skeleton animation="wave" height={50} />
               )}
             </Grid>
+            <Grid item xs={12}>
+              {loadedProfile ? (
+                <TextField
+                  required
+                  id="role"
+                  name="role"
+                  label="Role"
+                  fullWidth
+                  variant="outlined"
+                  disabled
+                  defaultValue={userProfile.roles && `${userProfile.roles[0]}`}
+                />
+              ) : (
+                <Skeleton animation="wave" height={50} />
+              )}
+            </Grid>
             {loadedProfile ? (
               <>
                 <Grid item xs={12} sm={6}>
@@ -321,25 +337,31 @@ class userProfile extends React.Component {
             <DialogContentText>
               Input the password you want to change.
             </DialogContentText>
-            <Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
               <PasswordField
                 label="Old Password"
                 variant="outlined"
                 onChange={this.handleChange("oldPassword")}
                 fullWidth
               />
+              </Grid>
+              <Grid item xs={12}>
               <PasswordField
                 label="New Password"
                 variant="outlined"
                 onChange={this.handleChange("newPassword")}
                 fullWidth
               />
+              </Grid>
+              <Grid item xs={12}>
               <PasswordField
                 label="Confirm Password"
                 variant="outlined"
                 fullWidth
                 onChange={this.handleChange("confirmPassword")}
               />
+              </Grid>
             </Grid>
           </DialogContent>
           <DialogActions>
