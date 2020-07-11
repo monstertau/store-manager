@@ -48,6 +48,10 @@ function ConnectedAddCustomer(props) {
   const handleSubmit = () => {
     console.log(state);
     props.addCustomer(state);
+    setTimeout(() => {
+      window.location.reload();
+      props.onClose();
+    }, 1000);
   };
   return (
     <div>

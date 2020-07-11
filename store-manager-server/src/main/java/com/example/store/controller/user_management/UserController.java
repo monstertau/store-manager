@@ -1,5 +1,6 @@
 package com.example.store.controller.user_management;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -125,10 +126,13 @@ public class UserController {
                                                                     currentUser.getMobileNo());
 
         Set<Role> roles = currentUser.getRoles();
+        List<String> roleName = new ArrayList<>();
         if(roles != null){
             for(Role role: roles) {
-                userInforResponse.addRole(role.getName().toString());
+                System.out.println(role.getName().toString());
+                roleName.add(role.getName().toString());
             }
+            userInforResponse.setRoles(roleName);
         }
         return new ResponseEntity<>(userInforResponse,
                                     HttpStatus.OK);

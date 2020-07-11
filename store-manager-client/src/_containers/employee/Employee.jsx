@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
 import tableIcons from "../../_utils/tableIcon";
 import "./employee.css";
+import { AddEmployee } from "./addEmployee";
 
 function connectedEmployee(props) {
   const [state, setState] = React.useState({
@@ -69,10 +70,12 @@ function connectedEmployee(props) {
     open: true,
     data: [],
     userResetPass: "",
+    dialogOpen: false,
   });
   const [open, setOpen] = React.useState(false);
   const handleCloseAlert = () => {
     setState({ ...state, open: false });
+    props.alertClear();
   };
   const handleClickOpen = () => {
     setOpen(true);
@@ -80,6 +83,12 @@ function connectedEmployee(props) {
 
   const handleClose = () => {
     setOpen(false);
+  };
+  const handleEmployeeAddClose = () => {
+    setState({
+      ...state,
+      dialogOpen: false,
+    });
   };
   const setOpenAlert = (prevState) => {
     return {
@@ -114,7 +123,7 @@ function connectedEmployee(props) {
     <div style={{ padding: "10px 15px" }}>
       {props.alert.message && (
         <CustomAlert
-          open={state.open}
+          open={props.alert.alertPopUp}
           autoHideDuration={2000}
           type={props.alert.type}
           onClose={handleCloseAlert}
@@ -122,60 +131,66 @@ function connectedEmployee(props) {
         />
       )}
       <div>
+        <AddEmployee
+          open={state.dialogOpen}
+          onClose={handleEmployeeAddClose}
+          maxWidth="md"
+          onSubmit={handleEmployeeAddClose}
+        />
         <MaterialTable
           title="Employee Managemnent"
           columns={state.columns}
           data={state.data}
           editable={{
-            onRowAdd: (newData) =>
-              new Promise((resolve, reject) => {
-                setTimeout(async () => {
-                  if (await validateService.validateEmail(newData.email)) {
-                    props.alertError("Invalid input Email!");
-                    setState((prevState) => {
-                      return {
-                        ...prevState,
-                        open: true,
-                      };
-                    });
-                    return reject();
-                  } else if (
-                    newData.mobileNo &&
-                    (await validateService.validateMobileNumber(
-                      newData.mobileNo
-                    ))
-                  ) {
-                    props.alertError("Invalid input phone number!");
-                    setState((prevState) => {
-                      return {
-                        ...prevState,
-                        open: true,
-                      };
-                    });
-                    return reject();
-                  } else {
-                    let newUserMsg = await employeeService.addUser(newData);
-                    if (newUserMsg.success === true) {
-                      setState((prevState) => {
-                        const data = [...prevState.data];
-                        data.push({ ...newData, id: newUserMsg.id });
-                        return { ...prevState, data, open: true };
-                      });
-                      props.alertSuccess("Created sucessful!");
-                      resolve();
-                    } else {
-                      setState((prevState) => {
-                        return {
-                          ...prevState,
-                          open: true,
-                        };
-                      });
-                      props.alertError(newUserMsg.message);
-                      reject();
-                    }
-                  }
-                }, 600);
-              }),
+            // onRowAdd: (newData) =>
+            //   new Promise((resolve, reject) => {
+            //     setTimeout(async () => {
+            //       if (await validateService.validateEmail(newData.email)) {
+            //         props.alertError("Invalid input Email!");
+            //         setState((prevState) => {
+            //           return {
+            //             ...prevState,
+            //             open: true,
+            //           };
+            //         });
+            //         return reject();
+            //       } else if (
+            //         newData.mobileNo &&
+            //         (await validateService.validateMobileNumber(
+            //           newData.mobileNo
+            //         ))
+            //       ) {
+            //         props.alertError("Invalid input phone number!");
+            //         setState((prevState) => {
+            //           return {
+            //             ...prevState,
+            //             open: true,
+            //           };
+            //         });
+            //         return reject();
+            //       } else {
+            //         let newUserMsg = await employeeService.addUser(newData);
+            //         if (newUserMsg.success === true) {
+            //           setState((prevState) => {
+            //             const data = [...prevState.data];
+            //             data.push({ ...newData, id: newUserMsg.id });
+            //             return { ...prevState, data, open: true };
+            //           });
+            //           props.alertSuccess("Created sucessful!");
+            //           resolve();
+            //         } else {
+            //           setState((prevState) => {
+            //             return {
+            //               ...prevState,
+            //               open: true,
+            //             };
+            //           });
+            //           props.alertError(newUserMsg.message);
+            //           reject();
+            //         }
+            //       }
+            //     }, 600);
+            //   }),
             onRowUpdate: (newData, oldData) =>
               new Promise(async (resolve, reject) => {
                 setTimeout(async () => {
@@ -265,6 +280,17 @@ function connectedEmployee(props) {
               }),
           }}
           actions={[
+            {
+              icon: tableIcons.Add,
+              tooltip: "Add Employee",
+              position: "toolbar",
+              onClick: (event, rowData) => {
+                setState({
+                  ...state,
+                  dialogOpen: true,
+                });
+              },
+            },
             {
               icon: tableIcons.VpnKeyIcon,
               tooltip: "Reset default password",

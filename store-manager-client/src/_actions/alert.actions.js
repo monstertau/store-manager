@@ -19,7 +19,16 @@ function success(message) {
 }
 
 function error(message) {
-  return { type: alertConstants.ERROR, message };
+  return (dispatch) => {
+    dispatch(clear());
+    dispatch(failure(message));
+  };
+  function failure() {
+    return { type: alertConstants.ERROR, message };
+  }
+  function clear() {
+    return { type: alertConstants.CLEAR };
+  }
 }
 
 function clear() {

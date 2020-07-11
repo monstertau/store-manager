@@ -5,6 +5,7 @@ import com.example.store.repository.sell_management.MostPaidCustomer;
 import java.util.List;
 
 public class OverAllResponse {
+    private Boolean success = true;
     private Integer customerCount;
     private Float revenue;
     private Float averagePricePerBill;
@@ -15,6 +16,9 @@ public class OverAllResponse {
         this.revenue = revenue;
         this.averagePricePerBill = averagePricePerBill;
         this.mostPaidCustomerList = mostPaidCustomerList;
+    }
+    public void setSuccess(Boolean success) {
+        this.success = success;
     }
 
     public List<MostPaidCustomer> getMostPaidCustomerList() {

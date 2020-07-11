@@ -12,7 +12,7 @@ public class UserInforResponse {
     private String email;
     private String address;
     private String mobileNo;
-    private List<String> roles = new ArrayList<>();
+    private List<String> roles;
 
     public UserInforResponse(Long id, String name, String username, Long salary, String email, String address, String mobileNo){
         this.id = id;
@@ -86,6 +86,14 @@ public class UserInforResponse {
 
     public void setSuccess(Boolean success) {
         this.success = success;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
     public void addRole(String role) {

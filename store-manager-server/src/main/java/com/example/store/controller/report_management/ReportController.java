@@ -46,11 +46,17 @@ public class ReportController {
         // get total cost
         Double buy_cost = buyItemRepository.totalBuy(report1Request.getStart(), report1Request.getEnd());
 
-        Double invoice_cost =  invoiceRepository.totalInvoice(report1Request.getStart(), report1Request.getEnd());
+        Double invoice_cost = invoiceRepository.totalInvoice(report1Request.getStart(), report1Request.getEnd());
 
         Double cost = 0D;
 
-        if(buy_cost != null && invoice_cost != null){
+        if (buy_cost != null) {
+            cost = buy_cost;
+        }
+        if (invoice_cost != null) {
+            cost = invoice_cost;
+        }
+        if (buy_cost != null && invoice_cost != null) {
             cost = buy_cost + invoice_cost;
         }
 
@@ -59,7 +65,7 @@ public class ReportController {
 
         Double revenue = 0D;
 
-        if(sell_revenue != null){
+        if (sell_revenue != null) {
             revenue = sell_revenue;
         }
 
@@ -70,19 +76,19 @@ public class ReportController {
 
 
         Long count = 0L;
-        for(BestSelling bestSelling: bestSellings) {    
-            if(count == report1Request.getLength()) {
+        for (BestSelling bestSelling : bestSellings) {
+            if (count == report1Request.getLength()) {
                 break;
             }
             Long id = bestSelling.getProduct_id();
             Double sold_quantities = bestSelling.getSold_quantities();
-            
+
             Product product = productRepository.findById(id).orElse(null);
 
             String name = null, unit = null, barcode = null;
             Float price = null, quantities = null;
 
-            if(product != null){
+            if (product != null) {
                 name = product.getName();
                 price = product.getPrice();
                 unit = product.getUnit();
