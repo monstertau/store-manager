@@ -87,11 +87,6 @@ const SecondaryItems = [
 ];
 const ThirdItems = [
   {
-    primary: "Settings",
-    path: "/settings",
-    icon: SettingsIcon,
-  },
-  {
     primary: "Contact Support",
     path: "/contact",
     icon: ContactSupportIcon,

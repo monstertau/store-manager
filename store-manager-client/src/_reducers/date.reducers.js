@@ -5,12 +5,16 @@ export const dateFilter = (state = {}, action) => {
     case dateConstants.START_DATE_SUCCESS:
       return Object.assign({}, state, {
         success: true,
-        startDate: action.startDate,
+        startDate:
+          action.startDate.toISOString().split("T")[0] +
+          action.startDate.toISOString().split("T")[1],
       });
     case dateConstants.END_DATE_SUCCESS:
       return Object.assign({}, state, {
         success: true,
-        endDate: action.endDate,
+        endDate:
+          action.endDate.toISOString().split("T")[0] +
+          action.endDate.toISOString().split("T")[1],
       });
     case dateConstants.START_DATE_INVALID:
       return Object.assign({}, state, {

@@ -224,52 +224,54 @@ function ConnectedBill(props) {
           columns={columnOrder}
         />
         {location.pathname == "/bill" ? (
-          <ExpansionPanel expanded={state.expanded}>
-            <ExpansionPanelSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1c-content"
-              id="panel1c-header"
-              onClick={(e) => {
-                e.preventDefault();
-                collapseExpaned();
-              }}
-            >
-              <Typography>Advanced Searching</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              <SearchWithDate />
-            </ExpansionPanelDetails>
-            <Divider />
-            <ExpansionPanelActions>
-              <Button
-                size="small"
-                onClick={(e) => {
-                  new Promise(async (resolve, reject) => {
-                    e.preventDefault();
-                    defaultSearch();
-                    resolve();
-                  });
-                }}
-              >
-                Clear
-              </Button>
-              <Button
-                size="small"
-                color="primary"
+          <div>
+            <ExpansionPanel expanded={state.expanded}>
+              <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1c-content"
+                id="panel1c-header"
                 onClick={(e) => {
                   e.preventDefault();
-                  searchSellDate();
+                  collapseExpaned();
                 }}
               >
-                Search
-              </Button>
-            </ExpansionPanelActions>
-          </ExpansionPanel>
+                <Typography>Advanced Searching</Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <SearchWithDate />
+              </ExpansionPanelDetails>
+              <Divider />
+              <ExpansionPanelActions>
+                <Button
+                  size="small"
+                  onClick={(e) => {
+                    new Promise(async (resolve, reject) => {
+                      e.preventDefault();
+                      defaultSearch();
+                      resolve();
+                    });
+                  }}
+                >
+                  Clear
+                </Button>
+                <Button
+                  size="small"
+                  color="primary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    searchSellDate();
+                  }}
+                >
+                  Search
+                </Button>
+              </ExpansionPanelActions>
+            </ExpansionPanel>
+            <Divider />
+          </div>
         ) : (
           <></>
         )}
 
-        <Divider />
         <MaterialTable
           title="Bill View"
           columns={column}
@@ -315,7 +317,7 @@ function ConnectedBill(props) {
               onClick: (event, rowData) => {
                 // console.log(rowData.sell_items);
                 new Promise(async (resolve, reject) => {
-                  console.log(rowData);
+                  // console.log(rowData);
                   setState({ ...state, rowData: rowData });
                   resolve();
                   handleClickOpen();
