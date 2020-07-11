@@ -141,6 +141,11 @@ function ConnectedDashbroad(props) {
     smallStats: [],
     open: true,
     mostPaidCustomerList: [],
+    revenueDay: {},
+    revenueMonth: {},
+    loading: false,
+    revenueYear: {},
+    chart: "",
   });
   const handleCloseAlert = () => {
     setState({ ...state, open: false });
@@ -183,18 +188,33 @@ function ConnectedDashbroad(props) {
       let date = new Date();
       let today = await getToday(date);
       let yesterday = await getYesterday(date);
-      // console.log(start, end);
       let result = await reportService.getReport(
         state.report.length,
         yesterday,
         today
       );
       let dashboard = await dashBoard.getDash("2010-01-01 06:52:05", today);
-
-      if (result.success === true && dashboard.success !== null) {
-        // console.log(result.products);
-        setState({
+      let revenue = await dashBoard.getRevenue();
+      // resolve();
+      if (
+        result.success === true &&
+        dashboard.success !== null &&
+        revenue.success === true
+      ) {
+        await setState({
           ...state,
+          revenueDay: {
+            lastDay: revenue.lastDay,
+            thisDay: revenue.thisDay,
+          },
+          revenueMonth: {
+            lastMonth: revenue.lastMonth,
+            thisMonth: revenue.thisMonth,
+          },
+          revenueYear: {
+            lastYear: revenue.lastYear,
+            thisYear: revenue.thisYear,
+          },
           productsData: result.products,
           mostPaidCustomerList: dashboard.mostPaidCustomerList,
           smallStats: [
@@ -273,6 +293,8 @@ function ConnectedDashbroad(props) {
               ],
             },
           ],
+          loading: true,
+          chart: "month",
         });
       } else {
         if (result.success === false) {
@@ -284,7 +306,11 @@ function ConnectedDashbroad(props) {
       resolve();
     });
   }, []);
-  return (
+  const setChart = (e) => {
+    setState({ ...state, chart: e });
+  };
+  // {state.loading?():null}
+  return !state.loading ? null : (
     <div style={{ padding: "10px 15px", maxWidth: "97%", margin: "0 auto" }}>
       {props.alert.message && (
         <CustomAlert
@@ -316,7 +342,118 @@ function ConnectedDashbroad(props) {
       </Grid>
       <Grid container style={{ margin: "20px" }}>
         <Grid item md={7} xs={12}>
-          <UsersOverview />
+          {state.chart != "month" ? null : (
+            <UsersOverview
+              range={setChart}
+              chartData={{
+                labels: Array.from(new Array(31), (_, i) =>
+                  i === 0 ? 1 : i + 1
+                ),
+                datasets: [
+                  {
+                    label: "Current Month",
+                    fill: "start",
+                    data: state.revenueMonth.thisMonth,
+                    backgroundColor: "rgba(0,123,255,0.1)",
+                    borderColor: "rgba(0,123,255,1)",
+                    pointBackgroundColor: "#ffffff",
+                    pointHoverBackgroundColor: "rgb(0,123,255)",
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                  },
+                  {
+                    label: "Past Month",
+                    fill: "start",
+                    data: state.revenueMonth.lastMonth,
+                    backgroundColor: "rgba(255,65,105,0.1)",
+                    borderColor: "rgba(255,65,105,1)",
+                    pointBackgroundColor: "#ffffff",
+                    pointHoverBackgroundColor: "rgba(255,65,105,1)",
+                    borderDash: [3, 3],
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 2,
+                    pointBorderColor: "rgba(255,65,105,1)",
+                  },
+                ],
+              }}
+            />
+          )}
+          {state.chart != "year" ? null : (
+            <UsersOverview
+              range={setChart}
+              chartData={{
+                labels: Array.from(new Array(12), (_, i) =>
+                  i === 0 ? 1 : i + 1
+                ),
+                datasets: [
+                  {
+                    label: "Current Year",
+                    fill: "start",
+                    data: state.revenueYear.thisYear,
+                    backgroundColor: "rgba(0,123,255,0.1)",
+                    borderColor: "rgba(0,123,255,1)",
+                    pointBackgroundColor: "#ffffff",
+                    pointHoverBackgroundColor: "rgb(0,123,255)",
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                  },
+                  {
+                    label: "Past Year",
+                    fill: "start",
+                    data: state.revenueYear.lastYear,
+                    backgroundColor: "rgba(255,65,105,0.1)",
+                    borderColor: "rgba(255,65,105,1)",
+                    pointBackgroundColor: "#ffffff",
+                    pointHoverBackgroundColor: "rgba(255,65,105,1)",
+                    borderDash: [3, 3],
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 2,
+                    pointBorderColor: "rgba(255,65,105,1)",
+                  },
+                ],
+              }}
+            />
+          )}
+          {state.chart != "day" ? null : (
+            <UsersOverview
+              range={setChart}
+              chartData={{
+                labels: Array.from(new Array(24), (_, i) => (i === 0 ? 0 : i)),
+                datasets: [
+                  {
+                    label: "Current Day",
+                    fill: "start",
+                    data: state.revenueDay.thisDay,
+                    backgroundColor: "rgba(0,123,255,0.1)",
+                    borderColor: "rgba(0,123,255,1)",
+                    pointBackgroundColor: "#ffffff",
+                    pointHoverBackgroundColor: "rgb(0,123,255)",
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                  },
+                  {
+                    label: "Past Day",
+                    fill: "start",
+                    data: state.revenueDay.lastDay,
+                    backgroundColor: "rgba(255,65,105,0.1)",
+                    borderColor: "rgba(255,65,105,1)",
+                    pointBackgroundColor: "#ffffff",
+                    pointHoverBackgroundColor: "rgba(255,65,105,1)",
+                    borderDash: [3, 3],
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 2,
+                    pointBorderColor: "rgba(255,65,105,1)",
+                  },
+                ],
+              }}
+            />
+          )}
         </Grid>
         <Grid
           item

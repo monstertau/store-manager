@@ -10,6 +10,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import { Grid, Divider } from "@material-ui/core";
 import SearchWithDate from "./SearchWithDate";
+import { dashBoard } from "../../_services/dashboard.service";
 
 const styles = (theme) => ({
   CardHeader: {
@@ -49,6 +50,12 @@ class UsersOverview extends React.Component {
     super(props);
 
     this.canvasRef = React.createRef();
+    this.state = {
+      chartData: {
+        labels: Array.from(new Array(31), (_, i) => (i === 0 ? 1 : i)),
+        datasets: [],
+      },
+    };
   }
 
   componentDidMount() {
@@ -126,6 +133,9 @@ class UsersOverview extends React.Component {
   handleChange(page) {
     this.props.history.push(page);
   }
+  handleChangeDash(e) {
+    this.props.range(e);
+  }
   render() {
     const { title, classes } = this.props;
     return (
@@ -140,9 +150,30 @@ class UsersOverview extends React.Component {
                 aria-label="outlined primary button group"
                 style={{ paddingLeft: "1rem" }}
               >
-                <Button>Day</Button>
-                <Button>Month</Button>
-                <Button>Year</Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    this.handleChangeDash("day");
+                  }}
+                >
+                  Day
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    this.handleChangeDash("month");
+                  }}
+                >
+                  Month
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    this.handleChangeDash("year");
+                  }}
+                >
+                  Year
+                </Button>
               </ButtonGroup>
             </Grid>
             <Grid item xs={4} className={classes.buttonRedirect}>
@@ -169,101 +200,12 @@ class UsersOverview extends React.Component {
   }
 }
 
+UsersOverview.propTypes = {
+  chartData: PropTypes.object,
+  range: PropTypes.string,
+};
 UsersOverview.defaultProps = {
   title: "Revenue Overview",
-  chartData: {
-    labels: Array.from(new Array(30), (_, i) => (i === 0 ? 1 : i)),
-    datasets: [
-      {
-        label: "Current Month",
-        fill: "start",
-        data: [
-          500,
-          800,
-          320,
-          180,
-          240,
-          320,
-          230,
-          650,
-          590,
-          1200,
-          750,
-          940,
-          1420,
-          1200,
-          960,
-          1450,
-          1820,
-          2800,
-          2102,
-          1920,
-          3920,
-          3202,
-          3140,
-          2800,
-          3200,
-          3200,
-          3400,
-          2910,
-          3100,
-          4250,
-        ],
-        backgroundColor: "rgba(0,123,255,0.1)",
-        borderColor: "rgba(0,123,255,1)",
-        pointBackgroundColor: "#ffffff",
-        pointHoverBackgroundColor: "rgb(0,123,255)",
-        borderWidth: 1.5,
-        pointRadius: 0,
-        pointHoverRadius: 3,
-      },
-      {
-        label: "Past Month",
-        fill: "start",
-        data: [
-          380,
-          430,
-          120,
-          230,
-          410,
-          740,
-          472,
-          219,
-          391,
-          229,
-          400,
-          203,
-          301,
-          380,
-          291,
-          620,
-          700,
-          300,
-          630,
-          402,
-          320,
-          380,
-          289,
-          410,
-          300,
-          530,
-          630,
-          720,
-          780,
-          1200,
-        ],
-        backgroundColor: "rgba(255,65,105,0.1)",
-        borderColor: "rgba(255,65,105,1)",
-        pointBackgroundColor: "#ffffff",
-        pointHoverBackgroundColor: "rgba(255,65,105,1)",
-        borderDash: [3, 3],
-        borderWidth: 1,
-        pointRadius: 0,
-        pointHoverRadius: 2,
-        pointBorderColor: "rgba(255,65,105,1)",
-      },
-    ],
-  },
 };
 
 const UsersOverviewRouter = withRouter(UsersOverview);

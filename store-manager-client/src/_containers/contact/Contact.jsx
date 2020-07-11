@@ -53,8 +53,30 @@ const useStyles = (theme) => ({
     // minHeight: "11rem",
     border: "1px solid #c7c5c5",
     borderRadius: "50%",
-    backgroundColor: "#c7c5c5",
+    backgroundColor: "white",
     width: "80%",
+    margin: "0 auto",
+    "&:hover": {
+      backgroundColor: "#c7c5c5",
+    },
+  },
+  title: {
+    color: "#ee6557",
+    marginTop: "1rem",
+  },
+  icon: {
+    fontSize: "9rem",
+    display: "block",
+    margin: "auto",
+    padding: "3rem",
+    color: "#c7c5c5",
+    "&:hover": {
+      color: "white",
+    },
+  },
+  detail: {
+    borderBottom: "1px solid #16a6b6",
+    display: "table",
     margin: "0 auto",
   },
 });
@@ -82,20 +104,18 @@ class ContactCon extends React.Component {
           <Grid container spacing={3}>
             {contactList.map((e, key) => (
               <Grid item xs={3} key={key}>
-                <div className={classes.circle}>
-                  <e.icon
-                    style={{
-                      fontSize: "9rem",
-                      display: "block",
-                      margin: "auto",
-                      padding: "3rem",
-                      color: "white",
-                    }}
-                  />
-                </div>
-                <div>
-                  <Typography align="center">{e.title}</Typography>
-                  <Typography align="center">{e.detail}</Typography>
+                <div className={classes.outer}>
+                  <div className={classes.circle}>
+                    <e.icon className={classes.icon} />
+                  </div>
+                  <div>
+                    <Typography align="center" className={classes.title}>
+                      {e.title}
+                    </Typography>
+                    <span align="center" className={classes.detail}>
+                      {e.detail}
+                    </span>
+                  </div>
                 </div>
               </Grid>
             ))}

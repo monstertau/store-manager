@@ -16,7 +16,7 @@ import ReceiptIcon from "@material-ui/icons/Receipt";
 import InboxIcon from "@material-ui/icons/Inbox";
 import PaymentIcon from "@material-ui/icons/Payment";
 import { makeStyles } from "@material-ui/core/styles";
-import { Link } from "react-router-dom";
+import { Link, withRouter, useLocation } from "react-router-dom";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 const useStyles = makeStyles((theme) => ({
   sidebar: {
@@ -28,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
   inheritLink: {
     textDecoration: "inherit",
     color: "inherit",
+  },
+  onSite: {
+    paddingLeft: "1.5rem",
+    [theme.breakpoints.down("xs")]: {
+      paddingLeft: "16px",
+    },
+    backgroundColor: "#f7f7f7",
   },
 }));
 
@@ -92,22 +99,30 @@ const ThirdItems = [
     icon: ContactSupportIcon,
   },
 ];
-export const MainListItems = () => {
+export const MainListItems = (props) => {
   const classes = useStyles();
+  let location = useLocation();
   return (
     <div>
       {MainItems.map((item, index) => (
         <ListItem
           button
-          className={classes.sidebar}
+          className={
+            location.pathname == item.path ? classes.onSite : classes.sidebar
+          }
           component={Link}
           to={item.path}
           key={index}
         >
           <ListItemIcon>
-            <item.icon />
+            <item.icon
+              color={location.pathname == item.path ? "primary" : ""}
+            />
           </ListItemIcon>
-          <ListItemText primary={item.primary} />
+          <ListItemText
+            primary={item.primary}
+            style={location.pathname == item.path ? { color: "#3f51b5" } : {}}
+          />
         </ListItem>
       ))}
     </div>
@@ -115,41 +130,57 @@ export const MainListItems = () => {
 };
 export const ThirdListItems = () => {
   const classes = useStyles();
+  let location = useLocation();
   return (
     <div>
       {ThirdItems.map((item, index) => (
         <ListItem
           button
-          className={classes.sidebar}
+          className={
+            location.pathname == item.path ? classes.onSite : classes.sidebar
+          }
           component={Link}
           to={item.path}
           key={index}
         >
           <ListItemIcon>
-            <item.icon />
+            <item.icon
+              color={location.pathname == item.path ? "primary" : ""}
+            />
           </ListItemIcon>
-          <ListItemText primary={item.primary} />
+          <ListItemText
+            primary={item.primary}
+            style={location.pathname == item.path ? { color: "#3f51b5" } : {}}
+          />
         </ListItem>
       ))}
     </div>
   );
 };
 export const SecondaryListItems = () => {
+  let location = useLocation();
   const classes = useStyles();
   return (
     <div>
       {SecondaryItems.map((item, index) => (
         <ListItem
           button
-          className={classes.sidebar}
+          className={
+            location.pathname == item.path ? classes.onSite : classes.sidebar
+          }
           component={Link}
           to={item.path}
           key={index}
         >
           <ListItemIcon>
-            <item.icon />
+            <item.icon
+              color={location.pathname == item.path ? "primary" : ""}
+            />
           </ListItemIcon>
-          <ListItemText primary={item.primary} />
+          <ListItemText
+            primary={item.primary}
+            style={location.pathname == item.path ? { color: "#3f51b5" } : {}}
+          />
         </ListItem>
       ))}
     </div>
