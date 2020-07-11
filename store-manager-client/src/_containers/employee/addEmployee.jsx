@@ -21,9 +21,9 @@ import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
-import BusinessCenterIcon from '@material-ui/icons/BusinessCenter';
+import BusinessCenterIcon from "@material-ui/icons/BusinessCenter";
 import PasswordField from "../../_components/common/PasswordField";
-import LockIcon from '@material-ui/icons/Lock';
+import LockIcon from "@material-ui/icons/Lock";
 import {
   Dialog,
   DialogContentText,
@@ -32,6 +32,9 @@ import {
   DialogTitle,
   DialogActions,
 } from "@material-ui/core";
+import { employeeService } from "../../_services";
+import { connect } from "react-redux";
+import { alertActions } from "../../_actions/alert.actions";
 const useStyles = makeStyles((theme) => ({
   dialog: {
     margin: theme.spacing(3),
@@ -41,16 +44,43 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
   },
 }));
-export function AddEmployee(props) {
+function AddEmployee(props) {
   const classes = useStyles();
   const [state, setState] = React.useState({
     name: "",
+    username: "",
     email: "",
+    password: "",
+
     address: "",
     mobileNo: "",
+    salary: "",
+    role: [],
   });
+  const handleChange = (prop) => (event) => {
+    setState({
+      ...state,
+      [prop]: event.target.value,
+    });
+  };
+  const handleSubmit = () => {
+    props.alertClear();
+    console.log(state);
+    employeeService.addUser(state).then((data) => {
+      if (data.success === true) {
+        props.alertSuccess("Add Employee Success");
+        setTimeout(() => {
+          window.location.reload();
+          props.onClose();
+        }, 1000);
+      } else {
+        props.alertError(data.message);
+      }
+    });
+  };
   return (
     <div>
+      
       <Dialog
         open={props.open}
         onClose={props.onClose}
@@ -79,6 +109,7 @@ export function AddEmployee(props) {
                     label="Name"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("name")}
                     // size="small"
                     // helperText="Supplier's name"
                   />
@@ -98,6 +129,7 @@ export function AddEmployee(props) {
                     label="Username"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("username")}
                     // size="small"
                     // helperText="Supplier's email"
                   />
@@ -117,6 +149,7 @@ export function AddEmployee(props) {
                     label="Email"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("email")}
                     // size="small"
                     // helperText="Supplier's email"
                   />
@@ -129,16 +162,17 @@ export function AddEmployee(props) {
                   <LockIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
-                <PasswordField
-                label="Password"
-                variant="outlined"
-                // onChange={this.handleChange("newPassword")}
-                fullWidth
-              />
+                  <PasswordField
+                    label="Password"
+                    variant="outlined"
+                    onChange={handleChange("password")}
+                    // onChange={this.handleChange("newPassword")}
+                    fullWidth
+                  />
                 </ListItemText>
               </ListItem>
             </Grid>
-            
+
             <Grid item xs={12} sm={6}>
               <ListItem>
                 <ListItemIcon>
@@ -151,6 +185,7 @@ export function AddEmployee(props) {
                     label="Address"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("address")}
                     // size="small"
                     // helperText="Supplier's address"
                   />
@@ -171,6 +206,7 @@ export function AddEmployee(props) {
                     fullWidth
                     type="number"
                     variant="outlined"
+                    onChange={handleChange("mobileNo")}
                     // size="small"
                     // helperText="Supplier's Mobile Number"
                   />
@@ -192,6 +228,7 @@ export function AddEmployee(props) {
                     fullWidth
                     variant="outlined"
                     type="number"
+                    onChange={handleChange("salary")}
                     // size="small"
                     // helperText="Supplier's Mobile Number"
                   />
@@ -217,6 +254,7 @@ export function AddEmployee(props) {
                       // value={state.age}
                       // onChange={handleChange}
                       label="Position"
+                      onChange={handleChange("role")}
                       inputProps={{
                         name: "role",
                         id: "outlined-age-native-simple",
@@ -237,7 +275,7 @@ export function AddEmployee(props) {
           <Button onClick={props.onClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={props.onClose} color="primary">
+          <Button onClick={handleSubmit} color="primary">
             Add
           </Button>
         </DialogActions>
@@ -250,3 +288,16 @@ AddEmployee.propTypes = {
   onClose: PropTypes.func,
   maxWidth: PropTypes.string,
 };
+const mapStateToProps = (state) => {};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    alertSuccess: (message) => dispatch(alertActions.success(message)),
+    alertError: (message) => dispatch(alertActions.error(message)),
+    alertClear: () => dispatch(alertActions.clear()),
+  };
+};
+const connectedAddEmployee = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AddEmployee);
+export { connectedAddEmployee as AddEmployee };

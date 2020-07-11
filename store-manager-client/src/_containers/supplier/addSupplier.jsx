@@ -23,14 +23,43 @@ import {
   DialogTitle,
   DialogActions,
 } from "@material-ui/core";
+import { supplierService } from "../../_services";
+import { alertActions } from "../../_actions/alert.actions";
+import { connect } from "react-redux";
 const useStyles = makeStyles((theme) => ({
   dialog: {
     margin: theme.spacing(3),
   },
 }));
-export function AddSupplier(props) {
+function AddSupplier(props) {
   const classes = useStyles();
-
+  const [state, setState] = React.useState({
+    name: "",
+    email: "",
+    address: "",
+    mobileNo: "",
+  });
+  const handleChange = (prop) => (event) => {
+    setState({
+      ...state,
+      [prop]: event.target.value,
+    });
+  };
+  const handleSubmit = () => {
+    props.alertClear();
+    console.log(state);
+    supplierService.createSupplier(state).then((data) => {
+      if (data.success === true) {
+        props.alertSuccess("Add Supplier Success");
+        setTimeout(() => {
+          window.location.reload();
+          props.onClose();
+        }, 1000);
+      } else {
+        props.alertError(data.message);
+      }
+    });
+  };
   return (
     <div>
       <Dialog
@@ -42,7 +71,7 @@ export function AddSupplier(props) {
         fullWidth={true}
       >
         <DialogTitle id="add-supplier-dialog-title">
-          <Typography style={{fontSize:"30px"}} align="center">
+          <Typography style={{ fontSize: "30px" }} align="center">
             Add New Supplier
           </Typography>
         </DialogTitle>
@@ -61,6 +90,7 @@ export function AddSupplier(props) {
                     label="Name"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("name")}
                     // size="small"
                     // helperText="Supplier's name"
                   />
@@ -70,7 +100,7 @@ export function AddSupplier(props) {
             <Grid item xs={12}>
               <ListItem>
                 <ListItemIcon>
-                  <EmailIcon color="primary"/>
+                  <EmailIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
@@ -80,6 +110,7 @@ export function AddSupplier(props) {
                     label="Email"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("email")}
                     // size="small"
                     // helperText="Supplier's email"
                   />
@@ -89,7 +120,7 @@ export function AddSupplier(props) {
             <Grid item xs={12} sm={6}>
               <ListItem>
                 <ListItemIcon>
-                  <BusinessIcon color="primary"/>
+                  <BusinessIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
@@ -98,6 +129,7 @@ export function AddSupplier(props) {
                     label="Address"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("address")}
                     // size="small"
                     // helperText="Supplier's address"
                   />
@@ -107,7 +139,7 @@ export function AddSupplier(props) {
             <Grid item xs={12} sm={6}>
               <ListItem>
                 <ListItemIcon>
-                  <PhoneAndroidIcon color="primary"/>
+                  <PhoneAndroidIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
@@ -117,6 +149,7 @@ export function AddSupplier(props) {
                     label="Mobile Number"
                     fullWidth
                     variant="outlined"
+                    onChange={handleChange("mobileNo")}
                     // size="small"
                     // helperText="Supplier's Mobile Number"
                   />
@@ -126,10 +159,10 @@ export function AddSupplier(props) {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.onClose} color="secondary" >
+          <Button onClick={props.onClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={props.onClose} color="primary">
+          <Button onClick={handleSubmit} color="primary">
             Add
           </Button>
         </DialogActions>
@@ -142,3 +175,16 @@ AddSupplier.propTypes = {
   onClose: PropTypes.func,
   maxWidth: PropTypes.string,
 };
+const mapStateToProps = (state) => {};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    alertSuccess: (message) => dispatch(alertActions.success(message)),
+    alertError: (message) => dispatch(alertActions.error(message)),
+    alertClear: () => dispatch(alertActions.clear()),
+  };
+};
+const connectedAddSupplier = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AddSupplier);
+export { connectedAddSupplier as AddSupplier };

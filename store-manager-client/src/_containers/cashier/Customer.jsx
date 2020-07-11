@@ -8,6 +8,7 @@ import CustomAlert from "../../_components/common/CustomAlert";
 import "./style.css";
 import { validateService } from "../../_services/validate.service";
 import tableIcons from "../../_utils/tableIcon";
+import { AddCustomer } from "./addCustomer";
 
 function connectedCustomer(props) {
   const [state, setState] = React.useState({
@@ -35,9 +36,17 @@ function connectedCustomer(props) {
     ],
     alert: { type: "", message: "" },
     data: [],
+    dialogOpen: false,
   });
   const handleCloseAlert = () => {
     setState({ ...state, open: false });
+    props.alertClear();
+  };
+  const handleCustomerAddClose = () => {
+    setState({
+      ...state,
+      dialogOpen: false,
+    });
   };
   useEffect(() => {
     props.alertClear();
@@ -54,7 +63,7 @@ function connectedCustomer(props) {
     <div>
       {props.alert.message && (
         <CustomAlert
-          open={state.open}
+          open={props.alert.alertPopUp}
           autoHideDuration={2000}
           type={props.alert.type}
           onClose={handleCloseAlert}
@@ -62,50 +71,56 @@ function connectedCustomer(props) {
         />
       )}
       <div style={{ padding: "10px 15px" }}>
+        <AddCustomer
+          open={state.dialogOpen}
+          onClose={handleCustomerAddClose}
+          maxWidth="sm"
+          onSubmit={handleCustomerAddClose}
+        />
         <MaterialTable
           title="Customer"
           columns={state.columns}
           data={state.data}
           editable={{
-            onRowAdd: (newData) =>
-              new Promise((resolve, reject) => {
-                setTimeout(async () => {
-                  if (
-                    newData.email &&
-                    (await validateService.validateEmail(newData.email))
-                  ) {
-                    props.alertError("Invalid input Email!");
-                    setState({ ...state, open: true });
-                    return reject();
-                  } else if (
-                    newData.mobileNo &&
-                    (await validateService.validateMobileNumber(
-                      newData.mobileNo
-                    ))
-                  ) {
-                    props.alertError("Invalid input phone number!");
-                    setState({ ...state, open: true });
-                    return reject();
-                  } else {
-                    let newCustomerMsg = await customerService.addCustomer(
-                      newData
-                    );
-                    if (newCustomerMsg.success === true) {
-                      setState((prevState) => {
-                        const data = [...prevState.data];
-                        data.push({ ...newData, id: newCustomerMsg.id });
-                        return { ...prevState, data, open: true };
-                      });
-                      props.alertSuccess("Created sucessful!");
-                      resolve();
-                    } else {
-                      setState({ ...state, open: true });
-                      props.alertError(newCustomerMsg.message);
-                      reject();
-                    }
-                  }
-                }, 600);
-              }),
+            // onRowAdd: (newData) =>
+            //   new Promise((resolve, reject) => {
+            //     setTimeout(async () => {
+            //       if (
+            //         newData.email &&
+            //         (await validateService.validateEmail(newData.email))
+            //       ) {
+            //         props.alertError("Invalid input Email!");
+            //         setState({ ...state, open: true });
+            //         return reject();
+            //       } else if (
+            //         newData.mobileNo &&
+            //         (await validateService.validateMobileNumber(
+            //           newData.mobileNo
+            //         ))
+            //       ) {
+            //         props.alertError("Invalid input phone number!");
+            //         setState({ ...state, open: true });
+            //         return reject();
+            //       } else {
+            //         let newCustomerMsg = await customerService.addCustomer(
+            //           newData
+            //         );
+            //         if (newCustomerMsg.success === true) {
+            //           setState((prevState) => {
+            //             const data = [...prevState.data];
+            //             data.push({ ...newData, id: newCustomerMsg.id });
+            //             return { ...prevState, data, open: true };
+            //           });
+            //           props.alertSuccess("Created sucessful!");
+            //           resolve();
+            //         } else {
+            //           setState({ ...state, open: true });
+            //           props.alertError(newCustomerMsg.message);
+            //           reject();
+            //         }
+            //       }
+            //     }, 600);
+            //   }),
             onRowUpdate: (newData, oldData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
@@ -181,6 +196,19 @@ function connectedCustomer(props) {
               fontSize: "16px",
             },
           }}
+          actions={[
+            {
+              icon: tableIcons.Add,
+              tooltip: "Add Customer",
+              position: "toolbar",
+              onClick: (event, rowData) => {
+                setState({
+                  ...state,
+                  dialogOpen: true,
+                });
+              },
+            },
+          ]}
           icons={tableIcons}
         />
       </div>
