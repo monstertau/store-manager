@@ -531,7 +531,7 @@ function ConnectedDashbroad(props) {
               <Orders
                 products={state.mostPaidCustomerList}
                 data={[
-                  { column: "Name", row: "customer_id", type: "text" },
+                  { column: "Customer ID", row: "customer_id", type: "text" },
                   {
                     column: "Total",
                     row: "total",
