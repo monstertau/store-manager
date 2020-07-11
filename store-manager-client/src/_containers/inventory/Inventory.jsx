@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useEffect, } from "react";
+import React, { useEffect } from "react";
 import MaterialTable from "material-table";
 import { inventoryService } from "../../_services/inventory.service";
 import { connect } from "react-redux";
@@ -10,6 +10,7 @@ import TablePagination from "@material-ui/core/TablePagination";
 import "./inventory.css";
 import { debounce } from "lodash";
 import tableIcons from "../../_utils/tableIcon";
+import { AddItem } from "./addItem";
 
 function connectedInventory(props) {
   const [state, setState] = React.useState({
@@ -71,6 +72,7 @@ function connectedInventory(props) {
     pageNumber: 0,
     numberRowPerPage: 5,
     recordsTotal: 0,
+    dialogOpen: false,
   });
   const handleChangeSearch = async (e) => {
     new Promise(async (resolve, reject) => {
@@ -92,6 +94,12 @@ function connectedInventory(props) {
         });
         resolve();
       }
+    });
+  };
+  const handleEmployeeAddClose = () => {
+    setState({
+      ...state,
+      dialogOpen: false,
     });
   };
   const handleChangePage = async (page) => {
@@ -169,52 +177,58 @@ function connectedInventory(props) {
         />
       )}
       <div style={{ padding: "10px 15px" }}>
+        <AddItem
+          open={state.dialogOpen}
+          onClose={handleEmployeeAddClose}
+          maxWidth="sm"
+          onSubmit={handleEmployeeAddClose}
+        />
         <MaterialTable
           title="Inventory"
           columns={state.columns}
           data={state.data}
           editable={{
-            onRowAdd: (newData) =>
-              new Promise((resolve, reject) => {
-                setTimeout(async () => {
-                  let newProductMsg = await inventoryService.addProduct(
-                    newData
-                  );
-                  if (newProductMsg.success === true) {
-                    props.alertSuccess("Created sucessful!");
-                    var result = await inventoryService.getProduct(
-                      0,
-                      state.numberRowPerPage,
-                      ""
-                    );
-                    setState((prevState) => {
-                      // const data = [...prevState.data];
-                      // data.push({ ...newData, id: newProductMsg.id });
-                      return {
-                        ...prevState,
-                        data: result.data,
-                        recordsTotal: resolve.recordsTotal,
-                        pageNumber: Math.ceil(
-                          state.recordsTotal / state.numberRowPerPage
-                        ),
-                        open: true,
-                      };
-                    });
-                    handleChangePage(
-                      state.recordsTotal % state.numberRowPerPage == 0
-                        ? Math.ceil(state.recordsTotal / state.numberRowPerPage)
-                        : Math.ceil(
-                            state.recordsTotal / state.numberRowPerPage
-                          ) - 1
-                    );
-                    resolve();
-                  } else {
-                    setState({ ...state, open: true });
-                    props.alertError(newProductMsg.message);
-                    reject();
-                  }
-                }, 600);
-              }),
+            // onRowAdd: (newData) =>
+            //   new Promise((resolve, reject) => {
+            //     setTimeout(async () => {
+            //       let newProductMsg = await inventoryService.addProduct(
+            //         newData
+            //       );
+            //       if (newProductMsg.success === true) {
+            //         props.alertSuccess("Created sucessful!");
+            //         var result = await inventoryService.getProduct(
+            //           0,
+            //           state.numberRowPerPage,
+            //           ""
+            //         );
+            //         setState((prevState) => {
+            //           // const data = [...prevState.data];
+            //           // data.push({ ...newData, id: newProductMsg.id });
+            //           return {
+            //             ...prevState,
+            //             data: result.data,
+            //             recordsTotal: resolve.recordsTotal,
+            //             pageNumber: Math.ceil(
+            //               state.recordsTotal / state.numberRowPerPage
+            //             ),
+            //             open: true,
+            //           };
+            //         });
+            //         handleChangePage(
+            //           state.recordsTotal % state.numberRowPerPage == 0
+            //             ? Math.ceil(state.recordsTotal / state.numberRowPerPage)
+            //             : Math.ceil(
+            //                 state.recordsTotal / state.numberRowPerPage
+            //               ) - 1
+            //         );
+            //         resolve();
+            //       } else {
+            //         setState({ ...state, open: true });
+            //         props.alertError(newProductMsg.message);
+            //         reject();
+            //       }
+            //     }, 600);
+            //   }),
             onRowUpdate: (newData, oldData) =>
               new Promise((resolve, reject) => {
                 setTimeout(async () => {
@@ -266,6 +280,19 @@ function connectedInventory(props) {
                 }, 600);
               }),
           }}
+          actions={[
+            {
+              icon: tableIcons.Add,
+              tooltip: "Add Item",
+              position: "toolbar",
+              onClick: (event, rowData) => {
+                setState({
+                  ...state,
+                  dialogOpen: true,
+                });
+              },
+            },
+          ]}
           options={{
             // search: true,
             actionsColumnIndex: -1,

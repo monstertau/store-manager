@@ -26,6 +26,11 @@ import TransactionDate from "./TransactionDate";
 import { billService } from "../../_services/bill.service";
 import { AddCustomer } from "../cashier/addCustomer";
 import { alertActions } from "../../_actions/alert.actions";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 const useStyles = (theme) => ({
   paper: {
     // height:"95%",
@@ -139,6 +144,8 @@ class connectedCashierUI extends React.Component {
       allCustomer: [{ id: 0, name: "null" }],
       showDialog: false,
       submitedBill: true,
+      showPrintedBill: false,
+      billId: null,
     };
   }
 
@@ -265,6 +272,8 @@ class connectedCashierUI extends React.Component {
               if (data.success === true) {
                 this.setState({
                   submitedBill: true,
+                  showPrintedBill: true,
+                  billId: data.id,
                 });
                 this.handleDiscard();
                 this.props.alertSuccess("Buy success!");
@@ -292,6 +301,14 @@ class connectedCashierUI extends React.Component {
       this.props.alertError("Cart must not empty!");
     }
   };
+  handlePrintBill = () => {
+    if (this.state.billId) {
+      window.open(`http://localhost:3000/invoice-print/${this.state.billId}`);
+      this.setState({
+        showPrintedBill: false,
+      });
+    }
+  };
   handleChooseCustomer = (event, value) => {
     if (value === null) {
       this.setState({
@@ -311,6 +328,11 @@ class connectedCashierUI extends React.Component {
       });
     }
   };
+  handleBillClose = () => {
+    this.setState({
+      showPrintedBill: false,
+    });
+  };
   handleChange = (name) => ({ target: { value } }) => {
     console.log(this.state.price.customerPay);
     this.setState({
@@ -325,6 +347,7 @@ class connectedCashierUI extends React.Component {
       showDialog: true,
     });
   };
+
   handleClose = () => {
     this.setState({
       showDialog: false,
@@ -461,7 +484,27 @@ class connectedCashierUI extends React.Component {
     };
     return (
       <div style={{ padding: "10px 15px" }}>
+        <Dialog
+          open={this.state.showPrintedBill}
+          onClose={this.handleBillClose}
+        >
+          <DialogTitle id="alert-dialog-title">{"Print Invoice?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Do you want to print the invoice?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleBillClose} color="primary">
+              No
+            </Button>
+            <Button onClick={this.handlePrintBill} color="primary" autoFocus>
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Grid container>
+          
           {/* <Grid item xs={12} container> */}
           <Grid item xs={4}>
             <Paper className={classes.productStyle}>
@@ -480,7 +523,7 @@ class connectedCashierUI extends React.Component {
                   </ListItemText>
                 </ListItem>
               </div>
-              <div style={{ maxHeight: 400, overflow: "auto" }}>
+              <div style={{ maxHeight: 500, overflow: "auto" }}>
                 {/* <ProductAdder /> */}
                 {this.state.productCart.length < 1 ? (
                   <Grid container style={{ marginTop: "10vh" }}>
@@ -622,7 +665,7 @@ class connectedCashierUI extends React.Component {
                       getOptionLabel={(option) => option.name}
                       renderOption={(option) => (
                         <React.Fragment>
-                          {option.name} - Phone: {option.mobileNo}
+                          {option.name} - Phone: {option.mobileNo} - ID: {option.id}
                         </React.Fragment>
                       )}
                       // style={{ width: 300 }}

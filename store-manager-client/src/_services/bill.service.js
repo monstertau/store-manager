@@ -4,6 +4,7 @@ export const billService = {
   searchSell,
   updateSell,
   deleteSell,
+  getSellInfo,
 };
 
 async function createNewSell(newBuy) {

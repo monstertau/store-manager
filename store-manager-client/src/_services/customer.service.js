@@ -4,6 +4,7 @@ export const customerService = {
   addCustomer,
   updateCustomer,
   deleteCustomer,
+  getCustomerInfo
 };
 
 async function getAll() {
@@ -60,6 +61,21 @@ async function updateCustomer(newData) {
 async function deleteCustomer(id) {
   const requestOption = {
     method: "DELETE",
+    headers: authHeader(),
+  };
+  return fetch(
+    `${process.env.REACT_APP_SERVER_URL}/api/v1/customers/${id}`,
+    requestOption
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      // console.log(data);
+      return data;
+    });
+}
+async function getCustomerInfo(id) {
+  const requestOption = {
+    method: "GET",
     headers: authHeader(),
   };
   return fetch(

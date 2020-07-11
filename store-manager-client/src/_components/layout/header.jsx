@@ -106,10 +106,10 @@ export default function CustomHeader() {
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       id={menuId}
       keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "center" }}
       open={isMenuOpen}
       onClose={handleMenuClose}
     >

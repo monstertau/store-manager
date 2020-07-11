@@ -35,6 +35,7 @@ import {
 import { employeeService } from "../../_services";
 import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
+import { inventoryService } from "../../_services/inventory.service";
 const useStyles = makeStyles((theme) => ({
   dialog: {
     margin: theme.spacing(3),
@@ -44,40 +45,27 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
   },
 }));
-function AddEmployee(props) {
+function AddItem(props) {
   const classes = useStyles();
   const [state, setState] = React.useState({
     name: "",
-    username: "",
-    email: "",
-    password: "",
-
-    address: "",
-    mobileNo: "",
-    salary: "",
-    roles: [],
+    unit: "",
+    barcode: "",
+    price: 0,
+    quantities: 0,
   });
   const handleChange = (prop) => (event) => {
-    if (prop === "roles") {
-      const roles = [];
-      roles.push(event.target.value)
-      setState({
-        ...state,
-        [prop]: roles,
-      });
-    } else {
-      setState({
-        ...state,
-        [prop]: event.target.value,
-      });
-    }
+    setState({
+      ...state,
+      [prop]: event.target.value,
+    });
   };
   const handleSubmit = () => {
     props.alertClear();
     console.log(state);
-    employeeService.addUser(state).then((data) => {
+    inventoryService.addProduct(state).then((data) => {
       if (data.success === true) {
-        props.alertSuccess("Add Employee Success");
+        props.alertSuccess("Add Item Success");
         setTimeout(() => {
           window.location.reload();
           props.onClose();
@@ -99,7 +87,7 @@ function AddEmployee(props) {
       >
         <DialogTitle id="add-supplier-dialog-title">
           <Typography style={{ fontSize: "30px" }} align="center">
-            Add New Employee
+            Add New Item
           </Typography>
         </DialogTitle>
         <DialogContent style={{ overflow: "hidden" }}>
@@ -132,12 +120,12 @@ function AddEmployee(props) {
                 <ListItemText>
                   <TextField
                     required
-                    id="username"
-                    name="username"
-                    label="Username"
+                    id="unit"
+                    name="unit"
+                    label="Unit"
                     fullWidth
                     variant="outlined"
-                    onChange={handleChange("username")}
+                    onChange={handleChange("unit")}
                     // size="small"
                     // helperText="Supplier's email"
                   />
@@ -152,69 +140,34 @@ function AddEmployee(props) {
                 <ListItemText>
                   <TextField
                     required
-                    id="email"
-                    name="email"
-                    label="Email"
+                    id="barcode"
+                    name="barcode"
+                    label="Barcode"
                     fullWidth
                     variant="outlined"
-                    onChange={handleChange("email")}
+                    onChange={handleChange("barcode")}
                     // size="small"
                     // helperText="Supplier's email"
                   />
                 </ListItemText>
               </ListItem>
             </Grid>
+
             <Grid item xs={12}>
               <ListItem>
                 <ListItemIcon>
-                  <LockIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText>
-                  <PasswordField
-                    label="Password"
-                    variant="outlined"
-                    onChange={handleChange("password")}
-                    // onChange={this.handleChange("newPassword")}
-                    fullWidth
-                  />
-                </ListItemText>
-              </ListItem>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <ListItem>
-                <ListItemIcon>
-                  <BusinessIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText>
-                  <TextField
-                    id="address"
-                    name="address"
-                    label="Address"
-                    fullWidth
-                    variant="outlined"
-                    onChange={handleChange("address")}
-                    // size="small"
-                    // helperText="Supplier's address"
-                  />
-                </ListItemText>
-              </ListItem>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ListItem>
-                <ListItemIcon>
-                  <PhoneAndroidIcon color="primary" />
+                  <MonetizationOnIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText>
                   <TextField
                     required
-                    id="mobileNo"
-                    name="mobileNo"
-                    label="Mobile Number"
+                    id="price"
+                    name="price"
+                    label="Price"
                     fullWidth
                     type="number"
                     variant="outlined"
-                    onChange={handleChange("mobileNo")}
+                    onChange={handleChange("price")}
                     // size="small"
                     // helperText="Supplier's Mobile Number"
                   />
@@ -230,50 +183,16 @@ function AddEmployee(props) {
                 <ListItemText>
                   <TextField
                     required
-                    id="salary"
-                    name="salary"
-                    label="Salary"
+                    id="quantities"
+                    name="quantities"
+                    label="Quantities"
                     fullWidth
                     variant="outlined"
                     type="number"
-                    onChange={handleChange("salary")}
+                    onChange={handleChange("quantities")}
                     // size="small"
                     // helperText="Supplier's Mobile Number"
                   />
-                </ListItemText>
-              </ListItem>
-            </Grid>
-            <Grid item xs={12}>
-              <ListItem>
-                <ListItemIcon>
-                  <BusinessCenterIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText>
-                  <FormControl
-                    variant="outlined"
-                    className={classes.formControl}
-                  >
-                    <InputLabel htmlFor="outlined-age-native-simple">
-                      Position
-                    </InputLabel>
-                    <Select
-                      autoWidth={true}
-                      native
-                      // value={state.age}
-                      // onChange={handleChange}
-                      label="Position"
-                      onChange={handleChange("roles")}
-                      inputProps={{
-                        name: "role",
-                        id: "outlined-age-native-simple",
-                      }}
-                    >
-                      <option aria-label="None" value="" />
-                      <option value={"ROLE_ADMIN"}>Admin</option>
-                      <option value={"ROLE_MANAGER"}>Warehouse Manager</option>
-                      <option value={"ROLE_CASHIER"}>Cashier</option>
-                    </Select>
-                  </FormControl>
                 </ListItemText>
               </ListItem>
             </Grid>
@@ -291,7 +210,7 @@ function AddEmployee(props) {
     </div>
   );
 }
-AddEmployee.propTypes = {
+AddItem.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
   maxWidth: PropTypes.string,
@@ -304,8 +223,5 @@ const mapDispatchToProps = (dispatch) => {
     alertClear: () => dispatch(alertActions.clear()),
   };
 };
-const connectedAddEmployee = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AddEmployee);
-export { connectedAddEmployee as AddEmployee };
+const connectedAddItem = connect(mapStateToProps, mapDispatchToProps)(AddItem);
+export { connectedAddItem as AddItem };
