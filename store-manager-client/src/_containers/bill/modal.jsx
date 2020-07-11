@@ -12,6 +12,7 @@ import PropTypes from "prop-types";
 import Orders from "../report/Orders";
 import { Divider, Grid, Chip } from "@material-ui/core";
 import { timePickerDefaultProps } from "@material-ui/pickers/constants/prop-types";
+import { numberWithCommas } from "../../_utils";
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -132,8 +133,10 @@ export default function CustomizedDialogs(props) {
                 <Grid item xs={4}>
                   {props.rowObj.total ? (
                     <Typography>
-                      <b> Total:</b>
-                      {Math.ceil(props.rowObj.total / (1 + props.rowObj.tax))}
+                      <b> Total: </b>
+                      {numberWithCommas(
+                        Math.ceil(props.rowObj.total / (1 + props.rowObj.tax))
+                      )}
                     </Typography>
                   ) : (
                     <></>
@@ -142,7 +145,7 @@ export default function CustomizedDialogs(props) {
                 <Grid item xs={3}>
                   {props.rowObj.tax ? (
                     <Typography>
-                      <b> Tax:</b> {props.rowObj.tax * 100}%
+                      <b> Tax:</b> {numberWithCommas(props.rowObj.tax * 100)}%
                     </Typography>
                   ) : (
                     <></>
@@ -150,7 +153,10 @@ export default function CustomizedDialogs(props) {
                 </Grid>
                 <Grid item xs={5}>
                   <Typography>
-                    <b>Grand Total</b>: {props.rowObj.total}
+                    <b>Grand Total: </b>
+                    {props.rowObj.total
+                      ? numberWithCommas(props.rowObj.total)
+                      : numberWithCommas(state.totalCompute)}
                     {/* {state.totalCompute} */}
                   </Typography>
                 </Grid>

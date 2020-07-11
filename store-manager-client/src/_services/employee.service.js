@@ -24,8 +24,8 @@ async function getAll() {
 async function addUser(newData) {
   let roles = [];
   if (newData.roles) {
-    roles.push(newData.roles);
-    // console.log(roles);
+    roles.push(newData.roles[0]);
+    console.log(roles);
   }
   newData = await { ...newData, roles: roles, password: "1" };
   // console.log(newData);

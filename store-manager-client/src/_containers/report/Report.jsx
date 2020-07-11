@@ -9,6 +9,8 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import { connect } from "react-redux";
 import { alertActions } from "../../_actions/alert.actions";
+import Button from "@material-ui/core/Button";
+import { dateActions } from "../../_actions/date.actions";
 
 // import Chart from "./Chart";
 import Deposits from "./Deposits";
@@ -16,8 +18,16 @@ import Orders from "./Orders";
 import { reportService } from "../../_services/report.service";
 import { numberWithCommas } from "../../_utils";
 import { Select } from "@material-ui/core";
-import { getToday } from "../../_utils/currentDate";
+import { getToday, getFullCurrentDate } from "../../_utils/currentDate";
+import SearchWithDate from "../../_components/common/SearchWithDate";
 
+//
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { getTime } from "date-fns";
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -104,18 +114,61 @@ function ConnectedReport(props) {
   const [state, setState] = React.useState({
     report: {
       length: "5",
-      start: "2018-01-30 06:52:05",
-      end: "2018-12-30 06:52:05",
+      start: "2010-01-30 06:52:05",
     },
     products: [],
     cost: 0,
     revenue: 0,
-    profit: 0,
+    expanded: false,
   });
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const defaultSearch = () => {
+    new Promise(async (resolve, reject) => {
+      // let end = await getFullCurrentDate(new Date(), "-") ;
+      let end = await getToday(new Date());
+      var result = await reportService.getReport(
+        state.report.length,
+        state.report.start,
+        end
+      );
+      if (result.success == false) {
+        props.alertError(result.message);
+      }
+      setState({
+        ...state,
+        cost: result.cost,
+        revenue: result.revenue,
+        products: result.products,
+        open: true,
+        expanded: false,
+      });
+      resolve();
+    });
+  };
+  const searchSellDate = () => {
+    new Promise(async (resolve, reject) => {
+      var result = await reportService.getReport(
+        state.report.length,
+        props.dateFilter.startDate,
+        props.dateFilter.endDate
+      );
+      if (result.success == false) {
+        props.alertError(result.message);
+      }
+      setState({
+        ...state,
+        cost: result.cost,
+        revenue: result.revenue,
+        products: result.products,
+        open: true,
+      });
+      resolve();
+    });
+  };
   useEffect(() => {
     props.alertClear();
+    props.clearDate();
     new Promise(async (resolve, reject) => {
       let date = await getToday(new Date());
       console.log(date);
@@ -139,10 +192,60 @@ function ConnectedReport(props) {
       resolve();
     });
   }, []);
+  const collapseExpaned = () => {
+    new Promise(async (resolve, reject) => {
+      setState({ ...state, expanded: !state.expanded });
+      resolve();
+    });
+  };
   return (
     <div className={classes.root}>
       <main className={classes.content}>
         <Container maxWidth="lg" className={classes.container}>
+          <ExpansionPanel
+            expanded={state.expanded}
+            style={{ marginBottom: "1rem" }}
+          >
+            <ExpansionPanelSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1c-content"
+              id="panel1c-header"
+              onClick={(e) => {
+                e.preventDefault();
+                collapseExpaned();
+              }}
+            >
+              <Typography>Advanced Searching</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <SearchWithDate />
+            </ExpansionPanelDetails>
+            <Divider />
+            <ExpansionPanelActions>
+              <Button
+                size="small"
+                onClick={(e) => {
+                  new Promise(async (resolve, reject) => {
+                    e.preventDefault();
+                    defaultSearch();
+                    resolve();
+                  });
+                }}
+              >
+                Clear
+              </Button>
+              <Button
+                size="small"
+                color="primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  searchSellDate();
+                }}
+              >
+                Search
+              </Button>
+            </ExpansionPanelActions>
+          </ExpansionPanel>
           <Grid container spacing={3}>
             {/* Chart
             <Grid item xs={12} md={8} lg={9}>
@@ -218,9 +321,10 @@ function ConnectedReport(props) {
   );
 }
 const mapStateToProps = (state) => {
-  const { alert } = state;
+  const { alert, dateFilter } = state;
   return {
     alert,
+    dateFilter,
   };
 };
 const mapDispatchToProps = (dispatch) => {
@@ -228,6 +332,7 @@ const mapDispatchToProps = (dispatch) => {
     alertSuccess: (message) => dispatch(alertActions.success(message)),
     alertError: (message) => dispatch(alertActions.error(message)),
     alertClear: () => dispatch(alertActions.clear()),
+    clearDate: () => dispatch(dateActions.clearDate()),
   };
 };
 const Report = connect(mapStateToProps, mapDispatchToProps)(ConnectedReport);

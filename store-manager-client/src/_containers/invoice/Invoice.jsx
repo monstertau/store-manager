@@ -22,7 +22,7 @@ const column = [
     field: "purpose",
     required: true,
   },
-  { title: "Create At", field: "createdAt", required: true },
+  { title: "Create At", field: "createdAt", required: true, editable: "never" },
   {
     title: "Description",
     field: "description",

@@ -109,7 +109,6 @@ const useStyles = makeStyles((theme) => ({
   CardContent: {
     padding: "12px",
     // display: "flex",
-    // height: "100%",
     position: "relative",
   },
   controlBar: {
@@ -141,6 +140,7 @@ function ConnectedDashbroad(props) {
     },
     smallStats: [],
     open: true,
+    mostPaidCustomerList: [],
   });
   const handleCloseAlert = () => {
     setState({ ...state, open: false });
@@ -196,6 +196,7 @@ function ConnectedDashbroad(props) {
         setState({
           ...state,
           productsData: result.products,
+          mostPaidCustomerList: dashboard.mostPaidCustomerList,
           smallStats: [
             {
               label: "Customer",
@@ -321,11 +322,13 @@ function ConnectedDashbroad(props) {
           item
           md={4}
           xs={12}
-          style={{ marginLeft: "5%", position: "relative" }}
+          style={{
+            marginLeft: "5%",
+            position: "relative",
+            alignItems: "stretch",
+          }}
         >
-          <Card
-          // style={{ height: "100%" }}
-          >
+          <Card>
             <CardHeader
               title="Most Sold Product"
               className={classes.CardHeader}
@@ -342,7 +345,7 @@ function ConnectedDashbroad(props) {
                     type: "text",
                   },
                 ]}
-                // style={{ margin: "auto 0", paddingBottom: "5%" }}
+                style={{ minHeight: "20.05rem" }}
               />
               <Grid container className={classes.controlBar}>
                 <Select
@@ -378,11 +381,41 @@ function ConnectedDashbroad(props) {
           </Card>
         </Grid>
       </Grid>
-      <Grid container>
-        <Grid item xs={4}>
-          <RedirectDash />
+      <Grid container style={{ margin: "20px" }}>
+        <Grid item md={4} xs={12}>
+          {/* <RedirectDash /> */}
+          <Card style={{ marginTop: "10px" }}>
+            <CardHeader
+              title="Most Paid Customer"
+              className={classes.CardHeader}
+            ></CardHeader>
+            <Divider></Divider>
+            <CardContent className={classes.CardContent}>
+              <Orders
+                products={state.mostPaidCustomerList}
+                data={[
+                  { column: "Name", row: "customer_id", type: "text" },
+                  {
+                    column: "Total",
+                    row: "total",
+                    type: "numberic",
+                  },
+                ]}
+                // style={{ margin: "auto 0", paddingBottom: "5%" }}
+              />
+              <Grid container className={classes.controlBar}></Grid>
+            </CardContent>
+          </Card>
         </Grid>
-        <Grid item xs={8}>
+        <Grid
+          item
+          xs={12}
+          md={8}
+          onClick={(e) => {
+            e.preventDefault();
+            props.history.push("bill");
+          }}
+        >
           <Bill />
         </Grid>
       </Grid>

@@ -51,6 +51,8 @@ const useStyles = (theme) => ({
   },
 
   buttonStyle: {
+    // display: "block",
+    marginLeft: "10%",
     // marginTop: theme.spacing(3),
     // marginBottom: theme.spacing(3),
   },
@@ -283,7 +285,7 @@ class userProfile extends React.Component {
                     onClick={this.handleSubmit}
                     // startIcon={}
                   >
-                    <UpdateIcon /> Update Profile
+                    <UpdateIcon style={{ marginRight: "2px" }} /> Update Profile
                   </Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -293,7 +295,8 @@ class userProfile extends React.Component {
                     className={classes.buttonStyle}
                     onClick={this.handleClickOpenDialog}
                   >
-                    <VpnKeyIcon /> Change password
+                    <VpnKeyIcon style={{ marginRight: "2px" }} /> Change
+                    password
                   </Button>
                 </Grid>
               </>
